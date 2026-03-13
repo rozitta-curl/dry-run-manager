@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/dry-run-manager.html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
