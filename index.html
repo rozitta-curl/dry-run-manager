@@ -820,7 +820,7 @@ buildChips();
 renderQ();
 
 function copyToLoop() {
-  const text = qbResult.map((r, i) => `${i+1}. ${r.q.question}`).join('\n');
+  const text = qbResult.map(r => r.q.question).join('\n');
   copyText(text, 'copy-loop-btn');
 }
 
