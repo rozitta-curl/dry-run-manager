@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dry Run Manager</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F4F4F6;--white:#fff;--border:#E4E4E7;--text:#18181B;--text2:#71717A;--text3:#A1A1AA;--blue:#3B82F6;--blue-bg:#EFF6FF;--green-bg:#F0FDF4;--green:#16A34A;--r:12px;--rs:8px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:600;color:var(--text);text-decoration:none}
+.logo-icon{width:34px;height:34px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.nav-links{display:flex;gap:8px}
+.nav-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;color:var(--text2);font-size:14px;cursor:pointer;border:none;background:none;transition:color .15s,background .15s}
+.nav-btn:hover{background:var(--bg);color:var(--text)}
+.nav-btn.active{color:var(--blue);font-weight:500}
+.page{display:none;padding:32px;max-width:1000px;margin:0 auto}
+.page.active{display:block}
+.toolbar{display:flex;gap:10px;margin-bottom:28px;align-items:center}
+.btn-p{display:flex;align-items:center;gap:6px;background:var(--text);color:#fff;border:none;border-radius:var(--rs);padding:8px 16px;font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s;white-space:nowrap}
+.btn-p:hover{opacity:.85}
+.btn-s{display:flex;align-items:center;gap:6px;background:var(--white);color:var(--text);border:1px solid var(--border);border-radius:var(--rs);padding:8px 14px;font-size:14px;cursor:pointer;transition:background .15s;white-space:nowrap}
+.btn-s:hover{background:var(--bg)}
+.sw{flex:1;position:relative;max-width:440px}
+.sw svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none}
+.si{width:100%;padding:8px 12px 8px 36px;border:1px solid var(--border);border-radius:var(--rs);font-size:14px;background:var(--white);outline:none;transition:border-color .15s}
+.si:focus{border-color:var(--blue)}
+.si::placeholder{color:var(--text3)}
+.sec-title{font-size:18px;font-weight:600;margin-bottom:14px;margin-top:8px}
+.card-list{display:flex;flex-direction:column;gap:10px;margin-bottom:32px}
+.dr-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;display:flex;align-items:center;gap:16px}
+.avatar{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.avatar.up{background:var(--blue-bg)}
+.avatar.up svg{stroke:var(--blue)}
+.avatar.dn{background:var(--green-bg)}
+.avatar.dn svg{stroke:var(--green)}
+.card-info{flex:1}
+.card-name{font-size:15px;font-weight:600;margin-bottom:4px}
+.card-meta{display:flex;gap:12px;color:var(--text2);font-size:13px;flex-wrap:wrap;align-items:center}
+.dot{color:var(--text3)}
+.lvl-badge{font-size:12px;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--blue-bg);color:var(--blue)}
+.lvl-badge.dn{background:var(--green-bg);color:var(--green)}
+.btn-edit{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:var(--rs);padding:6px 14px;font-size:13px;background:var(--white);color:var(--text);cursor:pointer;transition:background .15s;white-space:nowrap}
+.btn-edit:hover{background:var(--bg)}
+.q-box{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.q-head{padding:16px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.q-title{font-size:15px;font-weight:600}
+.chips{display:flex;gap:6px}
+.chip{padding:3px 10px;border-radius:20px;border:1px solid var(--border);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;background:var(--white);transition:all .15s;user-select:none}
+.chip:hover{border-color:var(--blue);color:var(--blue)}
+.chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.ha{margin-left:auto;display:flex;gap:6px}
+.ib{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.ib:hover{background:var(--bg)}
+.ib.danger:hover{background:#FEF2F2;border-color:#FCA5A5}
+.ib.danger:hover svg{stroke:#EF4444}
+.q-row{display:flex;align-items:center;gap:12px;padding:13px 20px;border-bottom:1px solid var(--border);transition:background .1s}
+.q-row:last-child{border-bottom:none}
+.q-row:hover{background:#FAFAFA}
+.qck{width:16px;height:16px;border:1.5px solid var(--border);border-radius:4px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.qck.on{background:var(--blue);border-color:var(--blue)}
+.qck.on::after{content:'';display:block;width:4px;height:7px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px)}
+.q-txt{flex:1;font-size:14px;line-height:1.45;color:var(--text)}
+.q-tags{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.stag{font-size:12px;padding:3px 8px;border-radius:6px;background:var(--bg);color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ltag{font-size:12px;padding:3px 8px;border-radius:20px;font-weight:500;white-space:nowrap}
+.ltag.A1{background:#EFF6FF;color:#2563EB}
+.ltag.A2{background:#F0FDF4;color:#16A34A}
+.ltag.A3{background:#FFFBEB;color:#D97706}
+.ltag.A4{background:#FDF4FF;color:#9333EA}
+.empty{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty p{margin-top:8px;font-size:13px}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.ov.open{display:flex}
+.modal{background:var(--white);border-radius:var(--r);padding:28px;width:480px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.12)}
+.modal h2{font-size:18px;font-weight:600;margin-bottom:20px}
+.fg{margin-bottom:16px}
+.fl{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:6px;display:block}
+.fi{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--rs);font-size:14px;outline:none;transition:border-color .15s;font-family:inherit}
+.fi:focus{border-color:var(--blue)}
+.fr{display:flex;gap:12px}
+.fr .fg{flex:1}
+select.fi{background:var(--white)}
+.ma{display:flex;gap:8px;justify-content:flex-end;margin-top:24px}
+.cb{font-size:11px;background:var(--bg);color:var(--text2);padding:1px 6px;border-radius:10px;margin-left:2px}
+.uf{margin:0 20px 16px;padding:10px 14px;background:var(--green-bg);border:1px solid #86EFAC;border-radius:var(--rs);color:var(--green);font-size:13px;display:none}
+
+/* INTERVIEW PAGE */
+.iv-header{padding:28px 32px 20px;max-width:1000px;margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.iv-title{font-size:22px;font-weight:700;margin-bottom:6px}
+.iv-meta{display:flex;gap:12px;color:var(--text2);font-size:13px;flex-wrap:wrap;align-items:center}
+.iv-body{max-width:1000px;margin:0 auto;padding:0 32px 32px}
+
+/* Tabs */
+.iv-tabs{display:flex;background:var(--bg);border-radius:10px;padding:3px;margin-bottom:24px;width:fit-content}
+.iv-tab{padding:7px 24px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--text2);transition:all .15s}
+.iv-tab.active{background:var(--white);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+
+/* Question cards */
+.iv-q-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:12px;cursor:pointer;transition:border-color .15s}
+.iv-q-card:hover{border-color:#CBD5E1}
+.iv-q-card.active-q{border-color:var(--blue);border-width:2px}
+.iv-q-num{font-size:13px;color:var(--text2);margin-bottom:8px}
+.iv-q-text{font-size:15px;font-weight:500;line-height:1.45;margin-bottom:16px}
+.iv-notes-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.iv-notes-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px}
+
+/* Bullet textarea */
+.bullet-area{width:100%;min-height:88px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;font-size:14px;font-family:inherit;resize:none;outline:none;transition:border-color .15s;color:var(--text);line-height:1.6;overflow:hidden}
+.bullet-area:focus{border-color:var(--blue);background:var(--white)}
+.bullet-area::placeholder{color:var(--text3)}
+
+/* Decision chips active state */
+#fb-decision .chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg width="18" height="18" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </div>
+    Dry Run Manager
+  </div>
+  <div class="nav-links">
+    <button class="nav-btn active" id="nb-d" onclick="showPage('d')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Дашборд
+    </button>
+    <button class="nav-btn" id="nb-q" onclick="showPage('q')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Питання
+    </button>
+  </div>
+</nav>
+
+<div class="page active" id="page-d">
+  <div class="toolbar">
+    <button class="btn-p" onclick="openDRModal()">
+      <svg width="14" height="14" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Новий драй-ран
+    </button>
+    <div class="sw">
+      <svg width="14" height="14" fill="none" stroke="#A1A1AA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="si" type="text" placeholder="Пошук за ім'ям" id="ds" oninput="renderDR()"/>
+    </div>
+  </div>
+  <div class="sec-title">Найближчі драй-рани</div>
+  <div class="card-list" id="up-list"></div>
+  <div class="sec-title">Завершені драй-рани</div>
+  <div class="card-list" id="dn-list"></div>
+</div>
+
+<!-- INTERVIEW PAGE -->
+<div class="page" id="page-iv">
+  <div class="iv-header">
+    <div>
+      <div class="iv-title" id="iv-name"></div>
+      <div class="iv-meta" id="iv-meta"></div>
+    </div>
+    <button class="btn-s" onclick="showPage('d')">Повернутися</button>
+  </div>
+  <div class="iv-body">
+    <div class="iv-tabs">
+      <button class="iv-tab active" id="tab-q" onclick="switchTab('q')">Питання та нотатки</button>
+      <button class="iv-tab" id="tab-f" onclick="switchTab('f')">Фідбек</button>
+    </div>
+    <div id="iv-tab-q">
+      <div id="iv-questions"></div>
+    </div>
+    <div id="iv-tab-f" style="display:none">
+      <button class="btn-p" style="margin-bottom:20px;gap:8px" onclick="generateFeedback()" id="gen-btn">
+        <svg width="14" height="14" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Згенерувати фідбек
+      </button>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;margin-bottom:12px">
+        <div style="font-size:15px;font-weight:600;margin-bottom:14px">Загальний фідбек</div>
+        <textarea class="bullet-area" id="fb-generated" placeholder="Автоматично згенерований фідбек з'явиться тут або додайте власний..." onkeydown="handleBullet(event)" oninput="autoResize(this);persistFeedback()" style="font-family:inherit"></textarea>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;margin-bottom:20px">
+        <div style="font-size:15px;font-weight:600;margin-bottom:14px">Рекомендації</div>
+        <textarea class="bullet-area" id="fb-recs" placeholder="Додайте рекомендації щодо подальших кроків..." onkeydown="handleBullet(event)" onfocus="initBullet(this)" oninput="autoResize(this);persistFeedback()" style="font-family:inherit"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:24px">
+        <span style="font-size:13px;font-weight:500;color:var(--text2)">Рішення:</span>
+        <div style="display:flex;gap:8px" id="fb-decision">
+          <button class="chip" onclick="setDecision('hire')" id="dec-hire">✓ Рекомендую</button>
+          <button class="chip" onclick="setDecision('maybe')" id="dec-maybe">Під питанням</button>
+          <button class="chip" onclick="setDecision('no')" id="dec-no">Не рекомендую</button>
+        </div>
+      </div>
+      <button class="btn-p" onclick="saveFeedback()">
+        <svg width="14" height="14" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Зберегти
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-q">
+  <div class="toolbar">
+    <button class="btn-p" onclick="openQModal()">
+      <svg width="14" height="14" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Нове питання
+    </button>
+    <button class="btn-s" onclick="document.getElementById('fu').click()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Завантажити файл
+    </button>
+    <input type="file" id="fu" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleUpload(event)"/>
+    <div class="sw">
+      <svg width="14" height="14" fill="none" stroke="#A1A1AA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="si" type="text" placeholder="Пошук питань" id="qs" oninput="renderQ()"/>
+    </div>
+  </div>
+  <div class="q-box">
+    <div class="q-head">
+      <span class="q-title">Список питань</span>
+      <div class="chips" id="chips"></div>
+      <div class="ha">
+        <button class="ib" title="Вибрати все" onclick="selAll()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+        <button class="ib danger" title="Видалити вибрані" onclick="delSel()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="q-list"></div>
+    <div id="uf" class="uf"></div>
+  </div>
+</div>
+
+<!-- DR Modal -->
+<div class="ov" id="ov-dr" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <h2>Новий драй-ран</h2>
+    <div class="fg"><label class="fl">Ім'я кандидата</label><input class="fi" id="fn" type="text" placeholder="Олександр Петренко"/></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Рівень</label>
+        <select class="fi" id="fl2"><option>A1</option><option>A2</option><option selected>A3</option><option>A4</option><option>Middle</option><option>Senior</option></select>
+      </div>
+      <div class="fg"><label class="fl">Дата та час</label><input class="fi" id="fd" type="datetime-local"/></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">RM</label><input class="fi" id="frm" type="text" placeholder="Марія Іваненко"/></div>
+      <div class="fg"><label class="fl">Інтерв'юер</label><input class="fi" id="fi2" type="text" placeholder="Олег"/></div>
+    </div>
+    <div class="ma">
+      <button class="btn-s" onclick="document.getElementById('ov-dr').classList.remove('open')">Скасувати</button>
+      <button class="btn-p" onclick="saveDR()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<!-- Q Modal -->
+<div class="ov" id="ov-q" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <h2>Нове питання</h2>
+    <div class="fg"><label class="fl">Текст питання</label><textarea class="fi" id="qt" rows="3" placeholder="Введіть питання..."></textarea></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Скіл</label><input class="fi" id="qsk" type="text" placeholder="Design Process"/></div>
+      <div class="fg"><label class="fl">Рівні (через кому)</label><input class="fi" id="qlv" type="text" placeholder="A1, A2"/></div>
+    </div>
+    <div class="ma">
+      <button class="btn-s" onclick="document.getElementById('ov-q').classList.remove('open')">Скасувати</button>
+      <button class="btn-p" onclick="saveQ()">Додати</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QDB=[{"id":1,"question":"Could you please tell us briefly about yourself and your experience?","skill":"General","levels":["A1","A2","A3","A4"]},{"id":2,"question":"Could you please tell what type of projects are interesting for you? On what you would prefer to work UI or UX?","skill":"General","levels":["A1","A2"]},{"id":3,"question":"On example of one of your previous projects could you please describe your working process?","skill":"Design Process","levels":["A1","A2","A3","A4"]},{"id":4,"question":"Let's imagine that you are assigned to the project and will need to redesign the existing site. What steps you will take to do it and why?","skill":"Design Process","levels":["A2","A3"]},{"id":5,"question":"You are assigned to the new feature development, and you need to provide the design solution. Previously discovery and research phases were already conducted. How will you start your work?","skill":"Design Process","levels":["A1","A2"]},{"id":6,"question":"What if after analyzing all materials you find out that you don't have enough information to understand the problem statement and propose the solution?","skill":"Design Process","levels":["A1","A2"]},{"id":7,"question":"Imagine you're tasked with designing an app feature. How would you start, and what would be your steps?","skill":"Design Process","levels":["A1","A2","A3","A4"]},{"id":8,"question":"Let's imagine that you are the only designer who will work on a new feature for a project. Could you please describe how you will plan your work and activities needed for the project?","skill":"Design Process","levels":["A2","A3","A4"]},{"id":9,"question":"Let's imagine that you have a task to develop a new concept for some feature on a project. How you will handle this process?","skill":"Design Process, Design Concept","levels":["A2","A3"]},{"id":10,"question":"What design documentation do you prepare on each phase of the design process? What is the goal of this documentation?","skill":"UX Documentation","levels":["A1","A2","A3","A4"]},{"id":11,"question":"What if after analyzing all materials you find out that you don't have enough information to understand the problem statement and propose the solution?","skill":"Requirements gathering","levels":["A1","A2"]},{"id":12,"question":"What would you do in case you received a task but do not fully understand it's requirements?","skill":"Requirements gathering","levels":["A1","A2"]},{"id":13,"question":"What you will do in case project requirements conflicting between stakeholders?","skill":"Requirements gathering, stakeholder management","levels":["A2","A3","A4"]},{"id":14,"question":"How the gathered information on the discovery and research phases helps you to make design decisions for your project?","skill":"Discovery, Research","levels":["A2","A3"]},{"id":15,"question":"Do you have experience working with Accessibility standards? If on your new project clients say that this is one of the priorities now, our product should follow these standards, what your process will look like?","skill":"Accessibility","levels":["A2","A3"]},{"id":16,"question":"Let's imagine that you are working on some feature for our platform, and you need to understand whether the solution will work. What you will be doing?","skill":"Validation","levels":["A2","A3"]},{"id":17,"question":"How would you validate your design solution in case you won't have an access to the users?","skill":"Validation","levels":["A2","A3"]},{"id":18,"question":"What validation methodologies are you used previously? Could you please describe some validation activity you conducted or participated in and what you received as an outcome?","skill":"Validation","levels":["A1","A2","A3"]},{"id":19,"question":"Can you walk us through your design process from lo-fi to final visual design?","skill":"Visual","levels":["A2","A3"]},{"id":20,"question":"Do you have experience with the data visualisation creation? What tools and techniques do you commonly use for creating data visualizations?","skill":"Visual","levels":["A2","A3"]},{"id":21,"question":"Can you share a project you're most proud of from a visual design perspective? What made it stand out?","skill":"Visual Design","levels":["A2","A3","A4"]},{"id":22,"question":"What methodologies or tools do you typically use to conduct visual research for a new project?","skill":"Visual Research","levels":["A2","A3","A4"]},{"id":23,"question":"Imagine you're presenting a new design concept to a client. How would you explain the rationale behind your design choices in a way they would understand?","skill":"Visual Design, Presentation","levels":["A2","A3","A4"]},{"id":24,"question":"Can you describe a time when you went beyond the client's expectations and provided a solution or concept that had the wow factor? What made it successful?","skill":"Visual Design, Design Concept","levels":["A2","A3","A4"]},{"id":25,"question":"What are the advantages and disadvantages of the design system?","skill":"Design System","levels":["A1","A2","A3"]},{"id":26,"question":"How you understand the difference between the DS, style guide and design library?","skill":"Design System","levels":["A1","A2"]},{"id":27,"question":"Let's imagine that you will need to build the design system from scratch. What will be your steps in this process, did you have similar experience?","skill":"Design System","levels":["A2","A3"]},{"id":28,"question":"You need to add or change something in the UI library, which is used by different teams. What will you do in this case?","skill":"Design System","levels":["A1","A2","A3"]},{"id":29,"question":"How do you approach designing for different platforms (e.g., web, mobile) to maintain a consistent visual style?","skill":"Design System, Consistency","levels":["A1","A2","A3"]},{"id":30,"question":"Could you please show an example how you usually prepare style guide pages or component specifications?","skill":"Design System","levels":["A1","A2"]},{"id":31,"question":"Let's imagine that you are working on the new feature that requires a component that is missing from the DS. What will you do in this case?","skill":"Design System","levels":["A1","A2","A3"]},{"id":32,"question":"What is design tokens and what is the value of using them?","skill":"Design System","levels":["A1","A2","A3"]},{"id":33,"question":"What is your approach to managing typography, colors, and spacing in Figma?","skill":"Figma","levels":["A1","A2"]},{"id":34,"question":"What is the difference between Figma styles and variables? When would you recommend to use what?","skill":"Figma","levels":["A1","A2"]},{"id":35,"question":"How do you manage responsiveness in Figma designs?","skill":"Figma","levels":["A1","A2"]},{"id":36,"question":"How do you structure and organize Figma files to keep them efficient, especially when working with large projects or multiple contributors?","skill":"Figma","levels":["A1","A2","A3"]},{"id":37,"question":"Could you please describe how do you collaborate with developers? How will you pass the hand-off for the development?","skill":"Dev collaboration","levels":["A1","A2","A3"]},{"id":38,"question":"Let's imagine that the dev team previously doesn't work with the designer. How would you set up collaboration with them?","skill":"Dev collaboration","levels":["A2","A3"]},{"id":39,"question":"You are presenting your work for the development team and receive feedback that it will be technically impossible to implement proposed solution. What you will be doing?","skill":"Dev collaboration","levels":["A1","A2","A3"]},{"id":40,"question":"How do you maintain ongoing collaboration with the developers during the project?","skill":"Dev collaboration","levels":["A2","A3"]},{"id":41,"question":"What happens after hand-off? How are you ensure that the solution was implemented according to the mockups?","skill":"Dev collaboration","levels":["A1","A2","A3"]},{"id":42,"question":"You worked on the mockups to cover some user flow. How you will prepare the hand-off before passing it to the dev team?","skill":"Dev collaboration","levels":["A1","A2","A3"]},{"id":43,"question":"How do you imagine ideal handoff to development?","skill":"Hand-off to development","levels":["A1","A2","A3","A4"]},{"id":44,"question":"How do you stay updated with the latest design trends and incorporate them into your work?","skill":"Trends","levels":["A2","A3"]},{"id":45,"question":"How do you typically collaborate with other UX/UI designers on a project?","skill":"Team Work","levels":["A1","A2","A3"]},{"id":46,"question":"Did you have experience working in the design team? What was your role and responsibilities?","skill":"Team Work","levels":["A1","A2","A3"]},{"id":47,"question":"Can you share an experience where you had to resolve a design disagreement with a teammate?","skill":"Team Work","levels":["A2","A3"]},{"id":48,"question":"How do you approach giving constructive feedback to other designers?","skill":"Team Work","levels":["A2","A3"]},{"id":49,"question":"How would you handle case if the team lead or other designers do not agree with your design solution?","skill":"Team Work","levels":["A1","A2","A3"]},{"id":50,"question":"How do you usually present your work accounting different roles (devs, business, designers)?","skill":"Presentation","levels":["A1","A2","A3"]},{"id":51,"question":"What do you do when stakeholders request changes that might negatively impact the visual design?","skill":"Client communication, Argumentation","levels":["A2","A3"]},{"id":52,"question":"What will be your actions in case PO/client/dev disagrees with all your ideas and pushes his own?","skill":"Client communication, Argumentation","levels":["A1","A2","A3"]},{"id":53,"question":"How you will handle if client has a straight vision on how something should be done, but you have your own opinion?","skill":"Client communication, Argumentation","levels":["A2","A3"]},{"id":54,"question":"Client come to you with an urgent request to quickly prepare a lot of mockups for the next day. How would you handle this situation?","skill":"Client communication, Argumentation","levels":["A2","A3"]},{"id":55,"question":"Do you use any frameworks (e.g., t-shirt sizing, story points) for estimating UX work?","skill":"Managing Workload, Estimation, Prioritization","levels":["A2","A3"]},{"id":56,"question":"What do you account for when estimating your work?","skill":"Managing Workload, Estimation, Prioritization","levels":["A2","A3"]},{"id":57,"question":"What do you do if a task takes significantly longer than estimated?","skill":"Managing Workload, Estimation, Prioritization","levels":["A1","A2","A3"]},{"id":58,"question":"How do you usually prioritize design work across several different features?","skill":"Managing Workload, Estimation, Prioritization","levels":["A2","A3"]},{"id":59,"question":"Have you previously had any difficulties in meeting project deadlines? How did you handle such cases?","skill":"Managing Workload, Estimation, Prioritization","levels":["A1","A2","A3"]},{"id":60,"question":"Let's imagine that two POs from different streams ask you to create mockups at one moment. What would you do?","skill":"Managing Workload, Estimation, Prioritization","levels":["A2","A3"]},{"id":61,"question":"Let's imagine that you will work on two streams in parallel. How would you manage your workload?","skill":"Workload Management","levels":["A2","A3","A4"]},{"id":62,"question":"PO come to you with an urgent request to quickly prepare a lot of mockups for the next day. How would you handle?","skill":"Workload Management","levels":["A2","A3","A4"]},{"id":63,"question":"If on a project you see some areas that could be improved but they weren't in initial plan or scope, what you will do?","skill":"Proactiveness","levels":["A2","A3"]},{"id":64,"question":"Let's imagine that you noticed communication gaps in a project. What will you do?","skill":"Proactiveness","levels":["A2","A3"]},{"id":65,"question":"After understanding high-level requirements, you created several design options. How would you decide which solution to present given limited time?","skill":"Ownership","levels":["A1","A2"]},{"id":66,"question":"If on a project you see areas that could be improved but weren't in scope, what will you do?","skill":"Proactiveness, Ownership","levels":["A2","A3","A4"]},{"id":67,"question":"What would you do in case your team lead or team members don't agree with your proposed design solution?","skill":"Work with feedback","levels":["A1","A2","A3"]},{"id":68,"question":"Let's imagine that you are presenting your design solution to a customer. What would you do if they disagree?","skill":"Work with feedback","levels":["A1","A2","A3","A4"]},{"id":69,"question":"A client gives you vague feedback like 'This doesn't feel bold and exciting enough.' How would you interpret and use it?","skill":"Work with Feedback","levels":["A2","A3","A4"]},{"id":70,"question":"What was your biggest challenge in the work? How you handle it?","skill":"Maturity","levels":["A2","A3","A4"]},{"id":71,"question":"What do you think is your strength (primary skills)?","skill":"Maturity","levels":["A1","A2"]},{"id":72,"question":"In what cases would you use checkbox vs radiobutton vs toggle vs select in UI?","skill":"UI controls knowledge","levels":["A1"]},{"id":73,"question":"When preparing mockups for a feature, how do you ensure its consistency with the rest of the application?","skill":"Work with mockups, consistency","levels":[]},{"id":74,"question":"How do you ensure consistency in your designs?","skill":"Design System, Consistency","levels":["A1","A2","A3"]},{"id":75,"question":"How would you organize your files and mockups to keep designs clean, shareable, and easy to navigate?","skill":"Figma","levels":["A1","A2"]},{"id":76,"question":"After understanding high-level requirements, you created several options. How would you decide which solution to present?","skill":"Ownership","levels":["A2","A3","A4"]},{"id":77,"question":"You prepared some feature and need to understand whether the solution will work. What will you do?","skill":"Validation","levels":["A1","A2"]},{"id":78,"question":"Imagine a client is starting a new business and approaches you for a full branding package. How would you approach this project?","skill":"Visual Design, Design process, Stakeholder Management","levels":["A3","A4"]},{"id":79,"question":"Can you share an example of collaborating with stakeholders who had very different creative preferences? How did you manage?","skill":"Visual Design, Stakeholder Management","levels":["A3","A4"]},{"id":80,"question":"Which project are you proud of and why, from a visual point of view?","skill":"Visual Design","levels":["A1","A2","A3","A4"]},{"id":81,"question":"How would you ensure all visual assets align with the brand identity, target audience and product strategy?","skill":"Visual Research / Branding","levels":["A3","A4"]},{"id":82,"question":"When working with copywriters, UX/UI specialists, or developers, how do you ensure everything aligns seamlessly?","skill":"Visual Design, Collaboration Across Teams","levels":["A3","A4"]},{"id":83,"question":"What do you think distinguishes you from other designers in terms of your ability to add value?","skill":"Maturity","levels":["A3","A4"]}];
+
+let questions=[...QDB],selLvl=[],checked=new Set(),nid=200;
+let dryRuns=[
+  {id:1,name:'Олександр Петренко',level:'Middle',date:'2026-03-03T14:00',rm:'Марія Іваненко',iv:'Олег'},
+  {id:2,name:'Анна Коваленко',level:'Senior',date:'2026-04-10T14:00',rm:'Марія Іваненко',iv:'Катя'},
+  {id:3,name:'Дмитро Шевченко',level:'Senior',date:'2026-01-15T14:00',rm:'Марія Іваненко',iv:'Олег'},
+];
+
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('nb-'+p).classList.add('active');
+}
+
+// DASHBOARD
+function fmt(s){const d=new Date(s);return d.toLocaleDateString('uk-UA',{day:'2-digit',month:'2-digit',year:'numeric'})+' о '+d.toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit'})}
+function isUp(s){return new Date(s)>new Date()}
+
+function renderDR(){
+  const f=(document.getElementById('ds').value||'').toLowerCase();
+  const fil=dryRuns.filter(d=>!f||d.name.toLowerCase().includes(f));
+  const up=fil.filter(d=>isUp(d.date)),dn=fil.filter(d=>!isUp(d.date));
+  const card=(d,t)=>`<div class="dr-card">
+    <div class="avatar ${t}"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+    <div class="card-info">
+      <div class="card-name">${d.name}</div>
+      <div class="card-meta">
+        <span class="lvl-badge ${t==='dn'?'dn':''}">${d.level}</span>
+        <span class="dot">•</span><span>${fmt(d.date)}</span>
+        <span class="dot">•</span><span>RM: ${d.rm}</span>
+        <span class="dot">•</span><span>Інтерв'юює: ${d.iv}</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn-edit">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Редагувати
+      </button>
+      <button class="btn-p" style="padding:6px 14px;font-size:13px" onclick="startIV(${d.id})">Почати</button>
+    </div>
+  </div>`;
+  const empty=msg=>`<div class="empty"><svg width="32" height="32" fill="none" stroke="#D4D4D8" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><p>${msg}</p></div>`;
+  document.getElementById('up-list').innerHTML=up.length?up.map(d=>card(d,'up')).join(''):empty('Немає запланованих драй-ранів');
+  document.getElementById('dn-list').innerHTML=dn.length?dn.map(d=>card(d,'dn')).join(''):empty('Немає завершених драй-ранів');
+}
+
+function openDRModal(){
+  const now=new Date();now.setHours(now.getHours()+1,0,0,0);
+  document.getElementById('fd').value=now.toISOString().slice(0,16);
+  document.getElementById('ov-dr').classList.add('open');
+}
+function saveDR(){
+  const name=document.getElementById('fn').value.trim();
+  if(!name){document.getElementById('fn').focus();return;}
+  dryRuns.push({id:Date.now(),name,level:document.getElementById('fl2').value,date:document.getElementById('fd').value,rm:document.getElementById('frm').value||'—',iv:document.getElementById('fi2').value||'—'});
+  document.getElementById('ov-dr').classList.remove('open');
+  ['fn','frm','fi2'].forEach(id=>document.getElementById(id).value='');
+  renderDR();
+}
+
+// QUESTIONS
+function buildChips(){
+  const lvls=['A1','A2','A3','A4'];
+  const cnt={};lvls.forEach(l=>cnt[l]=questions.filter(q=>q.levels.includes(l)).length);
+  document.getElementById('chips').innerHTML=lvls.map(l=>`
+    <button class="chip ${selLvl.includes(l)?'on':''}" onclick="togLvl('${l}')">
+      ${selLvl.includes(l)?'✓ ':''}${l}<span class="cb">${cnt[l]}</span>
+    </button>`).join('');
+}
+function togLvl(l){
+  selLvl.includes(l)?selLvl=selLvl.filter(x=>x!==l):selLvl.push(l);
+  buildChips();renderQ();
+}
+function renderQ(){
+  const s=(document.getElementById('qs').value||'').toLowerCase();
+  let fil=questions;
+  if(selLvl.length)fil=fil.filter(q=>selLvl.some(l=>q.levels.includes(l)));
+  if(s)fil=fil.filter(q=>q.question.toLowerCase().includes(s)||q.skill.toLowerCase().includes(s));
+  if(!fil.length){document.getElementById('q-list').innerHTML='<div class="empty"><p>Питань не знайдено</p></div>';return;}
+  document.getElementById('q-list').innerHTML=fil.map(q=>{
+    const tags=q.levels.length?q.levels.map(l=>`<span class="ltag ${l}">${l}</span>`).join(''):'';
+    return`<div class="q-row">
+      <div class="qck ${checked.has(q.id)?'on':''}" onclick="togChk(${q.id},this)"></div>
+      <div class="q-txt">${q.question}</div>
+      <div class="q-tags"><span class="stag" title="${q.skill}">${q.skill}</span>${tags}</div>
+    </div>`;
+  }).join('');
+}
+function togChk(id,el){checked.has(id)?(checked.delete(id),el.classList.remove('on')):(checked.add(id),el.classList.add('on'))}
+function selAll(){
+  const s=(document.getElementById('qs').value||'').toLowerCase();
+  const vis=questions.filter(q=>(!selLvl.length||selLvl.some(l=>q.levels.includes(l)))&&(!s||q.question.toLowerCase().includes(s)||q.skill.toLowerCase().includes(s))).map(q=>q.id);
+  const all=vis.every(id=>checked.has(id));
+  all?vis.forEach(id=>checked.delete(id)):vis.forEach(id=>checked.add(id));
+  renderQ();
+}
+function delSel(){
+  if(!checked.size)return;
+  if(!confirm(`Видалити ${checked.size} питань?`))return;
+  questions=questions.filter(q=>!checked.has(q.id));
+  checked.clear();buildChips();renderQ();
+}
+function openQModal(){
+  ['qt','qsk','qlv'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ov-q').classList.add('open');
+}
+function saveQ(){
+  const text=document.getElementById('qt').value.trim();
+  if(!text){document.getElementById('qt').focus();return;}
+  const levels=document.getElementById('qlv').value.split(',').map(l=>l.trim()).filter(Boolean);
+  questions.push({id:nid++,question:text,skill:document.getElementById('qsk').value.trim(),levels});
+  document.getElementById('ov-q').classList.remove('open');
+  buildChips();renderQ();
+}
+function handleUpload(e){
+  const f=e.target.files[0];if(!f)return;
+  const el=document.getElementById('uf');
+  el.style.display='block';
+  el.textContent=`Файл "${f.name}" завантажено. Парсинг Excel потребує серверного обробника — додамо в наступній ітерації.`;
+  e.target.value='';
+}
+
+// INTERVIEW
+const DEMO_QS=[
+  {id:1,question:"Could you please tell us briefly about yourself and your experience?",skill:"General"},
+  {id:3,question:"On example of one of your previous projects could you please describe your working process?",skill:"Design Process"},
+  {id:7,question:"Imagine you're tasked with designing an app feature. How would you start, and what would be your steps?",skill:"Design Process"},
+  {id:25,question:"What are the advantages and disadvantages of the design system?",skill:"Design System"},
+  {id:37,question:"Could you please describe how do you collaborate with developers? How will you pass the hand-off for the development?",skill:"Dev collaboration"},
+];
+
+let ivNotes={};// {qid: {good:'', improve:''}}
+let currentDR=null;
+let currentDecision=null;
+
+function startIV(id){
+  currentDR=dryRuns.find(d=>d.id===id);
+  if(!currentDR)return;
+  ivNotes={};
+  currentDecision=null;
+  document.getElementById('iv-name').textContent=currentDR.name;
+  document.getElementById('iv-meta').innerHTML=`
+    <span class="lvl-badge">${currentDR.level}</span>
+    <span class="dot">•</span><span>${fmt(currentDR.date)}</span>
+    <span class="dot">•</span><span>RM: ${currentDR.rm}</span>
+    <span class="dot">•</span><span>Інтерв'юює: ${currentDR.iv}</span>`;
+  document.getElementById('fb-generated').value='';
+  document.getElementById('fb-recs').value='';
+  ['hire','maybe','no'].forEach(k=>document.getElementById('dec-'+k).classList.remove('on'));
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-iv').classList.add('active');
+  switchTab('q');
+  loadStoredData(currentDR.id).then(()=>{
+    renderIVQuestions(DEMO_QS);
+    setTimeout(()=>document.querySelectorAll('.bullet-area').forEach(ta=>{if(ta.value)autoResize(ta);}),50);
+  });
+}
+
+function renderIVQuestions(qs){
+  document.getElementById('iv-questions').innerHTML=qs.map((q,i)=>{
+    const n=ivNotes[q.id]||{good:'',improve:''};
+    return`<div class="iv-q-card ${i===0?'active-q':''}" id="ivcard-${q.id}" onclick="activateCard(${q.id})">
+      <div class="iv-q-text" data-skill="${q.skill}"><span style="color:var(--text2);font-weight:400;margin-right:6px">${i+1}.</span>${q.question}</div>
+      <div class="iv-notes-row">
+        <div>
+          <div class="iv-notes-label">Що було добре</div>
+          <textarea class="bullet-area" id="note-good-${q.id}" placeholder="• " onkeydown="handleBullet(event)" onfocus="initBullet(this)" oninput="saveNote(${q.id},'good',this.value);autoResize(this)">${n.good}</textarea>
+        </div>
+        <div>
+          <div class="iv-notes-label">Що покращити</div>
+          <textarea class="bullet-area" id="note-imp-${q.id}" placeholder="• " onkeydown="handleBullet(event)" onfocus="initBullet(this)" oninput="saveNote(${q.id},'improve',this.value);autoResize(this)">${n.improve}</textarea>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function activateCard(id){
+  document.querySelectorAll('.iv-q-card').forEach(c=>c.classList.remove('active-q'));
+  const card=document.getElementById('ivcard-'+id);
+  if(card)card.classList.add('active-q');
+}
+
+function saveNote(qid,type,val){
+  if(!ivNotes[qid])ivNotes[qid]={good:'',improve:''};
+  ivNotes[qid][type]=val;
+  persistNotes();
+}
+
+function autoResize(ta){
+  ta.style.height='auto';
+  ta.style.height=ta.scrollHeight+'px';
+}
+
+function initBullet(ta){
+  if(!ta.value.trim()){ta.value='• ';}
+  autoResize(ta);
+}
+
+function handleBullet(e){
+  if(e.key!=='Enter')return;
+  e.preventDefault();
+  const ta=e.target;
+  const pos=ta.selectionStart;
+  const val=ta.value;
+  ta.value=val.substring(0,pos)+'\n• '+val.substring(pos);
+  ta.selectionStart=ta.selectionEnd=pos+3;
+  autoResize(ta);
+}
+
+function persistNotes(){
+  if(!currentDR)return;
+  try{window.storage.set('notes:'+currentDR.id,JSON.stringify(ivNotes));}catch(e){}
+}
+
+async function persistFeedback(){
+  if(!currentDR)return;
+  const fb={generated:document.getElementById('fb-generated').value,recs:document.getElementById('fb-recs').value,decision:currentDecision};
+  try{await window.storage.set('feedback:'+currentDR.id,JSON.stringify(fb));}catch(e){}
+}
+
+async function loadStoredData(drId){
+  try{const n=await window.storage.get('notes:'+drId);if(n)ivNotes=JSON.parse(n.value);}catch(e){ivNotes={};}
+  try{
+    const f=await window.storage.get('feedback:'+drId);
+    if(f){
+      const fb=JSON.parse(f.value);
+      document.getElementById('fb-generated').value=fb.generated||'';
+      document.getElementById('fb-recs').value=fb.recs||'';
+      autoResize(document.getElementById('fb-generated'));
+      autoResize(document.getElementById('fb-recs'));
+      if(fb.decision)setDecision(fb.decision);
+    }
+  }catch(e){}
+}
+
+function saveFeedback(){
+  persistFeedback();
+  const btn=event.currentTarget;
+  const orig=btn.innerHTML;
+  btn.innerHTML='✓ Збережено';btn.disabled=true;
+  setTimeout(()=>{btn.innerHTML=orig;btn.disabled=false;},1500);
+}
+
+async function generateFeedback(){
+  const noteEntries=DEMO_QS.map((q,i)=>{
+    const good=(ivNotes[q.id]?.good||'').trim().replace(/^•\s*/gm,'').trim();
+    const imp=(ivNotes[q.id]?.improve||'').trim().replace(/^•\s*/gm,'').trim();
+    if(!good&&!imp)return null;
+    return `Q${i+1}: "${q.question}"\n${good?`Good: ${good}`:''}${good&&imp?'\n':''}${imp?`Improve: ${imp}`:''}`;
+  }).filter(Boolean);
+
+  if(!noteEntries.length){
+    document.getElementById('fb-generated').value='Додайте нотатки до питань, щоб згенерувати фідбек.';
+    autoResize(document.getElementById('fb-generated'));return;
+  }
+
+  const btn=document.getElementById('gen-btn');
+  btn.disabled=true;
+  btn.innerHTML=`<svg width="14" height="14" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Генерую...`;
+
+  const candidate=currentDR?`${currentDR.name}, ${currentDR.level} level designer`:'the candidate';
+  const prompt=`You are a senior UX lead writing peer interview feedback. Based on the interview notes below, write structured honest feedback for ${candidate}.
+
+Interview notes:
+${noteEntries.join('\n\n')}
+
+Write polished formal peer feedback (2-3 paragraphs) that:
+- Opens with specific observations about the candidate's actual answers
+- Highlights concrete strengths with examples from the notes
+- Provides 2-3 actionable improvement suggestions tied to the interview answers
+- Avoids vague phrases like "showcased", "demonstrated a keen understanding", "commendable", "impressive grasp"
+- Sounds like a thoughtful colleague, not a performance review bot
+- Is in English
+
+Write only the feedback text, no headers, no bullet points.`;
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await resp.json();
+    const ta=document.getElementById('fb-generated');
+    ta.value=data.content?.[0]?.text||'Не вдалося згенерувати фідбек.';
+    autoResize(ta);
+    persistFeedback();
+  }catch(err){
+    document.getElementById('fb-generated').value='Помилка генерації. Спробуйте ще раз.';
+  }
+  btn.disabled=false;
+  btn.innerHTML=`<svg width="14" height="14" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Згенерувати фідбек`;
+}
+
+function switchTab(t){
+  document.getElementById('iv-tab-q').style.display=t==='q'?'block':'none';
+  document.getElementById('iv-tab-f').style.display=t==='f'?'block':'none';
+  document.getElementById('tab-q').classList.toggle('active',t==='q');
+  document.getElementById('tab-f').classList.toggle('active',t==='f');
+}
+
+function setDecision(d){
+  currentDecision=d;
+  ['hire','maybe','no'].forEach(k=>document.getElementById('dec-'+k).classList.toggle('on',k===d));
+  persistFeedback();
+}
+
+renderDR();buildChips();renderQ();
+</script>
+</body>
+</html>
