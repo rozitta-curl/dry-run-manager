@@ -11,7 +11,7 @@ if (!window.storage) {
   };
 }
 
-let questions=[...QDB],selLvl=[],checked=new Set(),nid=200;
+let questions=[...QDB],selLvl=null,checked=new Set(),nid=200;
 let qbLevel=null, qbSelectedSkills=new Set();
 let dryRuns=[
   {id:1,name:'Олександр Петренко',level:'Middle',date:'2026-03-03T14:00',rm:'Марія Іваненко',iv:'Олег'},
@@ -19,17 +19,13 @@ let dryRuns=[
   {id:3,name:'Дмитро Шевченко',level:'Senior',date:'2026-01-15T14:00',rm:'Марія Іваненко',iv:'Олег'},
 ];
 
-const PAGE_HASH = { d: 'Dashboard', q: 'Questions' };
-const HASH_PAGE = { Dashboard: 'd', Questions: 'q' };
-
 function showPage(p, pushState=true){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   const nbEl = document.getElementById('nb-'+p);
   if(nbEl) nbEl.classList.add('active');
-  const hash = '#' + (PAGE_HASH[p] || p);
-  try { if(pushState && location.hash !== hash) history.pushState({page:p}, '', hash); } catch(e){}
+  try { if(pushState && location.hash !== '#'+p) history.pushState({page:p}, '', '#'+p); } catch(e){}
 }
 
 window.addEventListener('popstate', e => {
@@ -38,10 +34,7 @@ window.addEventListener('popstate', e => {
 });
 
 function pageFromHash(){
-  try {
-    const h = location.hash.replace('#','');
-    return HASH_PAGE[h] || 'd';
-  } catch(e){ return 'd'; }
+  try { const h = location.hash.replace('#',''); return ['d','q'].includes(h) ? h : 'd'; } catch(e){ return 'd'; }
 }
 
 // DASHBOARD
@@ -93,59 +86,358 @@ function saveDR(){
   renderDR();
 }
 
-// QUESTIONS
-function buildChips(){
-  const lvls=['A1','A2','A3','A4'];
-  const cnt={};lvls.forEach(l=>cnt[l]=questions.filter(q=>q.levels.includes(l)).length);
-  document.getElementById('chips').innerHTML=lvls.map(l=>`
-    <button class="chip ${selLvl.includes(l)?'on':''}" onclick="togLvl('${l}')">
-      ${selLvl.includes(l)?'✓ ':''}${l}<span class="cb">${cnt[l]}</span>
-    </button>`).join('');
+// QUESTIONS — level filter dropdown
+const LVL_LABELS = {A1:'Junior', A2:'Middle', A3:'Senior', A4:'Lead'};
+const LVL_CODES = ['A1','A2','A3','A4'];
+
+function buildChips(){ /* no-op */ }
+
+function positionDropdown(btn, dropdown) {
+  const r = btn.getBoundingClientRect();
+  const dropH = dropdown.offsetHeight;
+  const spaceBelow = window.innerHeight - r.bottom;
+  if (spaceBelow >= dropH + 8 || spaceBelow >= 120) {
+    dropdown.style.top = (r.bottom + 6) + 'px';
+    dropdown.style.bottom = 'auto';
+  } else {
+    dropdown.style.bottom = (window.innerHeight - r.top + 6) + 'px';
+    dropdown.style.top = 'auto';
+  }
+  dropdown.style.left = r.left + 'px';
+  // prevent going off right edge
+  const dropW = dropdown.offsetWidth;
+  if (r.left + dropW > window.innerWidth - 8) {
+    dropdown.style.left = (window.innerWidth - dropW - 8) + 'px';
+  }
 }
-function togLvl(l){
-  selLvl.includes(l)?selLvl=selLvl.filter(x=>x!==l):selLvl.push(l);
-  buildChips();renderQ();
+function toggleLvlDropdown(){
+  const d = document.getElementById('lvl-dropdown');
+  const btn = document.getElementById('lvl-filter-btn');
+  d.classList.toggle('open');
+  if(d.classList.contains('open')) positionDropdown(btn, d);
 }
+function closeLvlDropdown(){ document.getElementById('lvl-dropdown').classList.remove('open'); }
+
+// null = all selected, [] = none selected, [...] = some selected
+// We track: selLvl=null means "All", selLvl=[] means "none", selLvl=[...] means partial
+
+function toggleLvlAll(){
+  const allChk = document.getElementById('lvl-chk-all');
+  if(selLvl === null){
+    // All → uncheck everything
+    selLvl = [];
+    allChk.checked = false; allChk.indeterminate = false;
+    document.querySelectorAll('.lvl-chk').forEach(c => c.checked = false);
+  } else {
+    // partial or none → select all
+    selLvl = null;
+    allChk.checked = true; allChk.indeterminate = false;
+    document.querySelectorAll('.lvl-chk').forEach(c => c.checked = true);
+  }
+  updateLvlLabel(); renderQ();
+}
+function updateLvlFilter(){
+  const checked = [...document.querySelectorAll('.lvl-chk:checked')].map(c => c.value);
+  const allChk = document.getElementById('lvl-chk-all');
+  if(checked.length === LVL_CODES.length){
+    selLvl = null;
+    allChk.checked = true; allChk.indeterminate = false;
+    document.querySelectorAll('.lvl-chk').forEach(c => c.checked = true);
+  } else if(checked.length === 0){
+    selLvl = [];
+    allChk.checked = false; allChk.indeterminate = false;
+  } else {
+    selLvl = checked;
+    allChk.checked = false; allChk.indeterminate = true;
+  }
+  updateLvlLabel(); renderQ();
+}
+function updateLvlLabel(){
+  const label = document.getElementById('lvl-filter-label');
+  if(selLvl === null){ label.textContent = 'Всі рівні'; return; }
+  if(selLvl.length === 0){ label.textContent = 'Рівень не обраний'; return; }
+  if(selLvl.length === 1){ label.textContent = LVL_LABELS[selLvl[0]]; return; }
+  label.textContent = selLvl.map(l => LVL_LABELS[l]).join(', ');
+}
+
+document.addEventListener('click', function(e){
+  const f = document.getElementById('lvl-filter');
+  if(f && !f.contains(e.target)) closeLvlDropdown();
+});
+
+// Category filter
+let selCat = null; // null=all, []=none, [...]=partial
+
+function buildCatOptions() {
+  const cats = [...new Set(questions.flatMap(q => getSkills(q)))].sort((a,b) => a.localeCompare(b));
+  document.getElementById('cat-options').innerHTML = cats.map(c =>
+    `<label class="lvl-option"><input type="checkbox" class="cat-chk" value="${c.replace(/"/g,'&quot;')}" onchange="updateCatFilter()" checked/><span>${c}</span></label>`
+  ).join('');
+}
+
+function toggleCatDropdown(){
+  const d = document.getElementById('cat-dropdown');
+  const btn = document.getElementById('cat-filter-btn');
+  d.classList.toggle('open');
+  if(d.classList.contains('open')) positionDropdown(btn, d);
+}
+function closeCatDropdown(){ document.getElementById('cat-dropdown').classList.remove('open'); }
+
+function toggleCatAll(){
+  const allChk = document.getElementById('cat-chk-all');
+  if(selCat === null){
+    // All → uncheck everything
+    selCat = [];
+    allChk.checked = false; allChk.indeterminate = false;
+    document.querySelectorAll('.cat-chk').forEach(c => c.checked = false);
+  } else {
+    // partial or none → select all
+    selCat = null;
+    allChk.checked = true; allChk.indeterminate = false;
+    document.querySelectorAll('.cat-chk').forEach(c => c.checked = true);
+  }
+  updateCatLabel(); renderQ();
+}
+function updateCatFilter(){
+  const checked = [...document.querySelectorAll('.cat-chk:checked')].map(c => c.value);
+  const total = document.querySelectorAll('.cat-chk').length;
+  const allChk = document.getElementById('cat-chk-all');
+  if(checked.length === total){
+    selCat = null;
+    allChk.checked = true; allChk.indeterminate = false;
+  } else if(checked.length === 0){
+    selCat = [];
+    allChk.checked = false; allChk.indeterminate = false;
+  } else {
+    selCat = checked;
+    allChk.checked = false; allChk.indeterminate = true;
+  }
+  updateCatLabel(); renderQ();
+}
+function updateCatLabel(){
+  const label = document.getElementById('cat-filter-label');
+  if(selCat === null){ label.textContent = 'Всі категорії'; return; }
+  if(selCat.length === 0){ label.textContent = 'Категорія не обрана'; return; }
+  if(selCat.length === 1){ label.textContent = selCat[0]; return; }
+  label.textContent = `${selCat.length} категорії`;
+}
+
+document.addEventListener('click', function(e){
+  const f = document.getElementById('cat-filter');
+  if(f && !f.contains(e.target)) closeCatDropdown();
+});
 function renderQ(){
   const s=(document.getElementById('qs').value||'').toLowerCase();
+  const noLevel = selLvl !== null && selLvl.length === 0;
+  const noCat   = selCat !== null && selCat.length === 0;
+  const emptyIcon = `<svg width="40" height="40" fill="none" stroke="#D4D4D8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M11 8v3l2 2"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`;
+  if(noLevel){
+    document.getElementById('q-list').innerHTML=`<div class="empty" style="padding:48px 24px">${emptyIcon}<p style="margin-top:12px;font-size:14px;color:var(--text2)">Виберіть хоча б один рівень</p></div>`;
+    return;
+  }
+  if(noCat){
+    document.getElementById('q-list').innerHTML=`<div class="empty" style="padding:48px 24px">${emptyIcon}<p style="margin-top:12px;font-size:14px;color:var(--text2)">Виберіть хоча б одну категорію</p></div>`;
+    return;
+  }
   let fil=questions;
-  if(selLvl.length)fil=fil.filter(q=>selLvl.some(l=>q.levels.includes(l)));
-  if(s)fil=fil.filter(q=>q.question.toLowerCase().includes(s)||q.skill.toLowerCase().includes(s));
+  if(selLvl !== null && selLvl.length) fil=fil.filter(q=>selLvl.some(l=>q.levels.includes(l)));
+  if(selCat !== null && selCat.length) fil=fil.filter(q=>getSkills(q).some(s=>selCat.includes(s)));
+  if(s) fil=fil.filter(q=>q.question.toLowerCase().includes(s)||q.skill.toLowerCase().includes(s));
   if(!fil.length){document.getElementById('q-list').innerHTML='<div class="empty"><p>Питань не знайдено</p></div>';return;}
   document.getElementById('q-list').innerHTML=fil.map(q=>{
-    const tags=q.levels.length?q.levels.map(l=>`<span class="ltag ${l}">${l}</span>`).join(''):'';
-    return`<div class="q-row">
+    const skills = getSkills(q).map(s=>`<span class="stag">${s}</span>`).join('');
+    return`<div class="q-row" id="qrow-${q.id}">
       <div class="qck ${checked.has(q.id)?'on':''}" onclick="togChk(${q.id},this)"></div>
-      <div class="q-txt">${q.question}</div>
-      <div class="q-tags"><span class="stag" title="${q.skill}">${q.skill}</span>${tags}</div>
+      <div class="q-body">
+        <div class="q-txt" id="qtxt-${q.id}">${q.question}</div>
+        <div class="q-tags">${skills}</div>
+      </div>
+      <button class="q-edit-btn" onclick="startEditQ(${q.id})" title="Редагувати">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
     </div>`;
   }).join('');
 }
-function togChk(id,el){checked.has(id)?(checked.delete(id),el.classList.remove('on')):(checked.add(id),el.classList.add('on'))}
-function selAll(){
-  const s=(document.getElementById('qs').value||'').toLowerCase();
-  const vis=questions.filter(q=>(!selLvl.length||selLvl.some(l=>q.levels.includes(l)))&&(!s||q.question.toLowerCase().includes(s)||q.skill.toLowerCase().includes(s))).map(q=>q.id);
-  const all=vis.every(id=>checked.has(id));
-  all?vis.forEach(id=>checked.delete(id)):vis.forEach(id=>checked.add(id));
+function togChk(id,el){
+  checked.has(id)?(checked.delete(id),el.classList.remove('on')):(checked.add(id),el.classList.add('on'));
+  updateSelectionUI();
+}
+
+function updateSelectionUI(){
+  const n = checked.size;
+  const filters = document.getElementById('q-filters');
+  const selBar = document.getElementById('q-sel-bar');
+  const selCount = document.getElementById('q-sel-count');
+  if(n > 0){
+    filters.style.display = 'none';
+    selBar.style.display = 'flex';
+    selCount.textContent = `· Вибрано: ${n}`;
+    selCount.style.display = 'inline';
+    document.querySelectorAll('.q-edit-btn').forEach(b => b.style.visibility = 'hidden');
+  } else {
+    filters.style.display = 'flex';
+    selBar.style.display = 'none';
+    selCount.style.display = 'none';
+    document.querySelectorAll('.q-edit-btn').forEach(b => b.style.visibility = 'visible');
+  }
+}
+
+function clearSelection(){
+  checked.clear();
+  updateSelectionUI();
   renderQ();
 }
-function delSel(){
-  if(!checked.size)return;
-  if(!confirm(`Видалити ${checked.size} питань?`))return;
-  questions=questions.filter(q=>!checked.has(q.id));
-  checked.clear();buildChips();renderQ();
+
+function startEditQ(id) {
+  const q = questions.find(x => x.id === id);
+  if (!q) return;
+  const body = document.querySelector(`#qrow-${id} .q-body`);
+  const editBtn = document.querySelector(`#qrow-${id} .q-edit-btn`);
+  editBtn.style.display = 'none';
+  body.innerHTML = `
+    <textarea class="q-edit-field" id="qedit-${id}">${q.question}</textarea>
+    <div class="q-edit-actions">
+      <button class="btn-p" style="font-size:12px;padding:4px 12px" onclick="saveEditQ(${id})">Зберегти</button>
+      <button class="btn-s" style="font-size:12px;padding:4px 12px" onclick="cancelEditQ(${id})">Скасувати</button>
+    </div>
+    <div class="q-tags">${getSkills(q).map(s=>`<span class="stag">${s}</span>`).join('')}</div>`;
+  const ta = document.getElementById(`qedit-${id}`);
+  ta.style.height = ta.scrollHeight + 'px';
+  ta.focus();
 }
+
+async function saveEditQ(id) {
+  const q = questions.find(x => x.id === id);
+  if (!q) return;
+  const val = document.getElementById(`qedit-${id}`).value.trim();
+  if (!val) return;
+  q.question = val;
+  try { await window.storage.set('questions', JSON.stringify(questions)); } catch(e){}
+  renderQ();
+}
+
+function cancelEditQ(id) {
+  renderQ();
+}
+function selAll(){
+  const s=(document.getElementById('qs').value||'').toLowerCase();
+  let vis=questions;
+  if(selLvl !== null && selLvl.length) vis=vis.filter(q=>selLvl.some(l=>q.levels.includes(l)));
+  if(selCat !== null && selCat.length) vis=vis.filter(q=>getSkills(q).some(sk=>selCat.includes(sk)));
+  if(s) vis=vis.filter(q=>q.question.toLowerCase().includes(s)||q.skill.toLowerCase().includes(s));
+  const ids=vis.map(q=>q.id);
+  const all=ids.every(id=>checked.has(id));
+  all?ids.forEach(id=>checked.delete(id)):ids.forEach(id=>checked.add(id));
+  const btn=document.getElementById('btn-del-sel');
+  if(btn) btn.style.display=checked.size>0?'flex':'none';
+  renderQ();
+}
+function confirmDelSel(){
+  if(!checked.size)return;
+  document.getElementById('ov-del-confirm').classList.add('open');
+}
+async function execDelSel(){
+  questions=questions.filter(q=>!checked.has(q.id));
+  checked.clear();
+  try { await window.storage.set('questions', JSON.stringify(questions)); } catch(e){}
+  document.getElementById('ov-del-confirm').classList.remove('open');
+  updateSelectionUI();
+  buildCatOptions();renderQ();
+}
+function delSel(){ confirmDelSel(); }
 function openQModal(){
-  ['qt','qsk','qlv'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('qt').value='';
+  document.getElementById('qsk-label').textContent='Виберіть категорію';
+  document.getElementById('qsk-label').style.color='var(--text3)';
+  document.getElementById('qlv-label').textContent='Виберіть рівні';
+  document.getElementById('qlv-label').style.color='var(--text3)';
+  document.querySelectorAll('.qlv-chk').forEach(c=>c.checked=false);
+  rebuildQskOptions();
   document.getElementById('ov-q').classList.add('open');
 }
-function saveQ(){
+
+function rebuildQskOptions(){
+  const selLvls=[...document.querySelectorAll('.qlv-chk:checked')].map(c=>c.value);
+  let cats;
+  if(selLvls.length===0){
+    cats=[...new Set(questions.flatMap(q=>getSkills(q)))].sort((a,b)=>a.localeCompare(b));
+  } else {
+    cats=[...new Set(questions.filter(q=>selLvls.some(l=>q.levels.includes(l))).flatMap(q=>getSkills(q)))].sort((a,b)=>a.localeCompare(b));
+  }
+  const prev=[...document.querySelectorAll('.qsk-chk:checked')].map(c=>c.value);
+  document.getElementById('qsk-options').innerHTML=cats.map(c=>
+    `<label class="lvl-option"><input type="checkbox" class="qsk-chk" value="${c.replace(/"/g,'&quot;')}" onchange="updateQskLabel()"${prev.includes(c)?' checked':''}/><span>${c}</span></label>`
+  ).join('');
+  updateQskLabel();
+}
+
+function onQlvChange(){
+  updateQlvLabel();
+  rebuildQskOptions();
+}
+
+function toggleQskDropdown(){
+  const d=document.getElementById('qsk-dropdown');
+  d.classList.toggle('open');
+  if(d.classList.contains('open')){
+    d.style.position='absolute';
+    d.style.top='calc(100% + 4px)';
+    d.style.left='0';
+    d.style.bottom='';
+    d.style.width='100%';
+  }
+}
+function toggleQlvDropdown(){
+  const d=document.getElementById('qlv-dropdown');
+  d.classList.toggle('open');
+  if(d.classList.contains('open')){
+    d.style.position='absolute';
+    d.style.top='calc(100% + 4px)';
+    d.style.left='0';
+    d.style.bottom='';
+    d.style.width='100%';
+  }
+}
+function updateQskLabel(){
+  const sel=[...document.querySelectorAll('.qsk-chk:checked')].map(c=>c.value);
+  const lbl=document.getElementById('qsk-label');
+  if(!sel.length){
+    lbl.textContent='Виберіть категорію';
+    lbl.style.color='var(--text3)';
+    return;
+  }
+  // try full text, measure if it fits
+  const joined=sel.join(', ');
+  lbl.textContent=joined;
+  lbl.style.color='var(--text)';
+  // check overflow: if scrollWidth > offsetWidth it doesn't fit
+  if(lbl.scrollWidth>lbl.offsetWidth+2){
+    lbl.textContent=`${sel.length} категорії`;
+  }
+}
+function updateQlvLabel(){
+  const sel=[...document.querySelectorAll('.qlv-chk:checked')].map(c=>c.value);
+  const lbl=document.getElementById('qlv-label');
+  if(!sel.length){lbl.textContent='Виберіть рівні';lbl.style.color='var(--text3)';}
+  else{lbl.textContent=sel.map(v=>LVL_LABELS[v]).join(', ');lbl.style.color='var(--text)';}
+}
+// close modal dropdowns on outside click
+document.addEventListener('click',function(e){
+  const sf=document.getElementById('qsk-filter');
+  if(sf&&!sf.contains(e.target)) document.getElementById('qsk-dropdown').classList.remove('open');
+  const lf=document.getElementById('qlv-filter');
+  if(lf&&!lf.contains(e.target)) document.getElementById('qlv-dropdown').classList.remove('open');
+});
+
+async function saveQ(){
   const text=document.getElementById('qt').value.trim();
   if(!text){document.getElementById('qt').focus();return;}
-  const levels=document.getElementById('qlv').value.split(',').map(l=>l.trim()).filter(Boolean);
-  questions.push({id:nid++,question:text,skill:document.getElementById('qsk').value.trim(),levels});
+  const skills=[...document.querySelectorAll('.qsk-chk:checked')].map(c=>c.value);
+  const levels=[...document.querySelectorAll('.qlv-chk:checked')].map(c=>c.value);
+  questions.push({id:nid++,question:text,skill:skills.join(', '),levels});
+  try { await window.storage.set('questions', JSON.stringify(questions)); } catch(e){}
   document.getElementById('ov-q').classList.remove('open');
-  buildChips();renderQ();
+  buildCatOptions();renderQ();
 }
 function handleUpload(e){
   const f=e.target.files[0];if(!f)return;
@@ -423,6 +715,23 @@ function toggleSkill(el, skill) {
 }
 
 // sorted skill order for questions
+const SKILL_NORMALIZE = {
+  'work with feedback': 'Work with Feedback',
+  'work with feeback':  'Work with Feedback',
+  'stakeholder management': 'Stakeholder Management',
+  'consistency': 'Consistency',
+  'design process': 'Design Process',
+};
+
+function normalizeSkill(s) {
+  const t = s.trim();
+  return SKILL_NORMALIZE[t.toLowerCase()] || t;
+}
+
+function getSkills(q) {
+  return q.skill.split(',').map(s => normalizeSkill(s));
+}
+
 function skillSortIndex(skillStr) {
   const first = skillStr.split(',')[0].trim();
   const i = SKILL_ORDER.indexOf(first);
@@ -528,11 +837,27 @@ function deleteQuestion(idx) {
   renderQBList();
 }
 
-renderDR();
-buildChips();
-renderQ();
-showPage(pageFromHash(), false);
-try { history.replaceState({page: pageFromHash()}, '', location.hash || '#Dashboard'); } catch(e){}
+(async () => {
+  // Load persisted questions if any
+  try {
+    const stored = await window.storage.get('questions');
+    if (stored) questions = JSON.parse(stored.value);
+  } catch(e) {}
+
+  renderDR();
+  buildChips();
+  buildCatOptions();
+  selLvl = null;
+  selCat = null;
+  document.getElementById('lvl-chk-all').checked = true;
+  document.querySelectorAll('.lvl-chk').forEach(c => c.checked = true);
+  updateLvlLabel();
+  document.getElementById('cat-chk-all').checked = true;
+  updateCatLabel();
+  renderQ();
+  showPage(pageFromHash(), false);
+  try { history.replaceState({page: pageFromHash()}, '', location.hash || '#Dashboard'); } catch(e){}
+})();
 
 function copyToLoop() {
   const text = qbResult.map(r => r.q.question).join('\n');
@@ -561,7 +886,7 @@ function copyText(text, btnId) {
 }
 
 
-// Expose all functions to global scope for inline HTML handlers
+// Expose all functions to global scope
 window.showPage = showPage;
 window.pageFromHash = pageFromHash;
 window.fmt = fmt;
@@ -570,12 +895,36 @@ window.renderDR = renderDR;
 window.openDRModal = openDRModal;
 window.saveDR = saveDR;
 window.buildChips = buildChips;
-window.togLvl = togLvl;
+window.positionDropdown = positionDropdown;
+window.toggleLvlDropdown = toggleLvlDropdown;
+window.closeLvlDropdown = closeLvlDropdown;
+window.toggleLvlAll = toggleLvlAll;
+window.updateLvlFilter = updateLvlFilter;
+window.updateLvlLabel = updateLvlLabel;
+window.buildCatOptions = buildCatOptions;
+window.toggleCatDropdown = toggleCatDropdown;
+window.closeCatDropdown = closeCatDropdown;
+window.toggleCatAll = toggleCatAll;
+window.updateCatFilter = updateCatFilter;
+window.updateCatLabel = updateCatLabel;
 window.renderQ = renderQ;
 window.togChk = togChk;
+window.updateSelectionUI = updateSelectionUI;
+window.clearSelection = clearSelection;
+window.startEditQ = startEditQ;
+window.saveEditQ = saveEditQ;
+window.cancelEditQ = cancelEditQ;
 window.selAll = selAll;
+window.confirmDelSel = confirmDelSel;
+window.execDelSel = execDelSel;
 window.delSel = delSel;
 window.openQModal = openQModal;
+window.rebuildQskOptions = rebuildQskOptions;
+window.onQlvChange = onQlvChange;
+window.toggleQskDropdown = toggleQskDropdown;
+window.toggleQlvDropdown = toggleQlvDropdown;
+window.updateQskLabel = updateQskLabel;
+window.updateQlvLabel = updateQlvLabel;
 window.saveQ = saveQ;
 window.handleUpload = handleUpload;
 window.startIV = startIV;
@@ -594,6 +943,8 @@ window.switchTab = switchTab;
 window.setDecision = setDecision;
 window.selectLevel = selectLevel;
 window.toggleSkill = toggleSkill;
+window.normalizeSkill = normalizeSkill;
+window.getSkills = getSkills;
 window.skillSortIndex = skillSortIndex;
 window.buildQuestions = buildQuestions;
 window.appendQuestions = appendQuestions;
