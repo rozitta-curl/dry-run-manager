@@ -8,10 +8,10 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#F4F4F6;--white:#fff;--border:#E4E4E7;--text:#18181B;--text2:#71717A;--text3:#A1A1AA;--blue:#3B82F6;--blue-bg:#EFF6FF;--green-bg:#F0FDF4;--green:#16A34A;--r:12px;--rs:8px}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
-nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:flex-start;position:sticky;top:0;z-index:100}
 .logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:600;color:var(--text);text-decoration:none}
 .logo-icon{width:34px;height:34px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center}
-.nav-links{display:flex;gap:8px}
+.nav-links{display:flex;gap:8px;margin-left:20px}
 .nav-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;color:var(--text2);font-size:14px;cursor:pointer;border:none;background:none;transition:color .15s,background .15s}
 .nav-btn:hover{background:var(--bg);color:var(--text)}
 .nav-btn.active{color:var(--blue);font-weight:500}
@@ -129,13 +129,20 @@ select.fi{background:var(--white)}
 .skill-chip.on{background:var(--blue-bg);color:var(--blue);border-color:var(--blue);font-weight:500}
 
 /* Generated questions */
-.qb-q-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.qb-q-item{display:flex;align-items:flex-start;gap:0;padding:14px 0;border-bottom:1px solid var(--border)}
 .qb-q-item:last-child{border-bottom:none}
-.qb-q-num{font-size:13px;color:var(--text3);width:22px;flex-shrink:0;padding-top:1px}
-.qb-q-body{flex:1}
-.qb-q-text{font-size:14px;line-height:1.45;color:var(--text);margin-bottom:4px}
+.qb-q-item.dragging{opacity:.4}
+.qb-q-item.drag-over{border-top:2px solid var(--blue)}
+.qb-q-drag{display:flex;align-items:center;color:var(--text3);cursor:grab;flex-shrink:0;padding-top:2px;margin-right:8px}
+.qb-q-drag:active{cursor:grabbing}
+.qb-q-num{font-size:13px;color:var(--text3);flex-shrink:0;padding-top:1px;margin-right:8px}
+.qb-q-body{flex:1;min-width:0}
+.qb-q-main{display:flex;align-items:flex-start;gap:12px}
+.qb-q-text{font-size:14px;line-height:1.45;color:var(--text);margin-bottom:4px;flex:1;min-width:0}
+.qb-q-del{flex-shrink:0;background:none;border:none;cursor:pointer;padding:2px 4px;color:#ef4444;display:flex;align-items:center;opacity:.7;transition:opacity .15s}
+.qb-q-del:hover{opacity:1}
 .qb-q-actions{display:flex;gap:6px;margin-top:8px}
-.qb-q-badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--blue-bg);color:var(--blue);margin-bottom:6px}
+.qb-q-badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--blue-bg);color:var(--blue)}
 .qb-q-btn{font-size:12px;padding:3px 10px;border-radius:var(--rs);border:1px solid var(--border);background:var(--white);color:var(--text2);cursor:pointer;transition:all .15s}
 .qb-q-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue)}
 .qb-q-btn:disabled{opacity:.35;cursor:not-allowed}
@@ -197,10 +204,6 @@ select.fi{background:var(--white)}
       <div style="height:1px;background:var(--border);margin:24px 0"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
         <div class="qb-label" style="margin:0">Список питань <span id="qb-count" style="font-weight:400;color:var(--text3)"></span></div>
-        <button class="btn-s" style="font-size:12px;padding:5px 12px" onclick="buildQuestions()">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
-          Перегенерувати
-        </button>
       </div>
       <div id="qb-questions"></div>
       <div style="display:flex;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">
@@ -357,11 +360,22 @@ let dryRuns=[
   {id:3,name:'Дмитро Шевченко',level:'Senior',date:'2026-01-15T14:00',rm:'Марія Іваненко',iv:'Олег'},
 ];
 
-function showPage(p){
+function showPage(p, pushState=true){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
-  document.getElementById('nb-'+p).classList.add('active');
+  const nbEl = document.getElementById('nb-'+p);
+  if(nbEl) nbEl.classList.add('active');
+  try { if(pushState && location.hash !== '#'+p) history.pushState({page:p}, '', '#'+p); } catch(e){}
+}
+
+window.addEventListener('popstate', e => {
+  const p = (e.state && e.state.page) || pageFromHash();
+  showPage(p, false);
+});
+
+function pageFromHash(){
+  try { const h = location.hash.replace('#',''); return ['d','q'].includes(h) ? h : 'd'; } catch(e){ return 'd'; }
 }
 
 // DASHBOARD
@@ -749,75 +763,84 @@ function buildQuestions() {
   const lvlCodes = LEVEL_MAP[qbLevel];
   const orderedSkills = [...qbSelectedSkills].sort((a,b) => skillSortIndex(a) - skillSortIndex(b));
 
-  const result = [];
+  // collect IDs already in the list to avoid duplicates
+  const existingIds = new Set(qbResult.map(r => r.q.id));
+
+  const toAdd = [];
   orderedSkills.forEach(skill => {
-    const pool = questions
-      .filter(q => q.levels.some(l => lvlCodes.includes(l)) && q.skill.split(',').some(t => t.trim() === skill))
-      .sort(() => Math.random() - 0.5);
-    if (pool.length) result.push({q: pool[0], skill});
+    // skip skills already represented in existing results
+    const alreadyHasSkill = qbResult.some(r => r.skill === skill);
+    if (alreadyHasSkill) return;
+
+    questions
+      .filter(q => q.levels.some(l => lvlCodes.includes(l)) && q.skill.split(',').some(t => t.trim() === skill) && !existingIds.has(q.id))
+      .forEach(q => { toAdd.push({q, skill}); existingIds.add(q.id); });
   });
 
-  qbResult = result;
+  qbResult = [...qbResult, ...toAdd];
   renderQBList();
   document.getElementById('qb-result').style.display = 'block';
-  document.getElementById('qb-result').scrollIntoView({behavior:'smooth', block:'start'});
+  if (toAdd.length) document.getElementById('qb-result').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function renderQBList() {
-  const lvlCodes = LEVEL_MAP[qbLevel];
-  const usedIds = new Set(qbResult.map(r => r.q.id));
-
   document.getElementById('qb-count').textContent = `(${qbResult.length} питань)`;
-  document.getElementById('qb-questions').innerHTML = qbResult.map((r, i) => {
-    // check if there's another unused question in same skill
-    const hasMore = questions.some(q =>
-      !usedIds.has(q.id) &&
-      q.levels.some(l => lvlCodes.includes(l)) &&
-      q.skill.split(',').some(t => t.trim() === r.skill)
-    );
-    return `<div class="qb-q-item" id="qbitem-${r.q.id}">
+  document.getElementById('qb-questions').innerHTML = qbResult.map((r, i) => `
+    <div class="qb-q-item" id="qbitem-${i}" draggable="true" data-idx="${i}">
+      <div class="qb-q-drag" title="Перетягнути">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="4" cy="2.5" r="1"/><circle cx="8" cy="2.5" r="1"/><circle cx="4" cy="6" r="1"/><circle cx="8" cy="6" r="1"/><circle cx="4" cy="9.5" r="1"/><circle cx="8" cy="9.5" r="1"/></svg>
+      </div>
       <div class="qb-q-num">${i+1}.</div>
       <div class="qb-q-body">
-        <div class="qb-q-text">${r.q.question}</div>
-        <div class="qb-q-badge">${r.skill}</div>
-        <div class="qb-q-actions">
-          <button class="qb-q-btn" onclick="regenQuestion(${r.q.id},'${r.skill.replace(/'/g,"\\'")}')" ${hasMore?'':'disabled'}>
-            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
-            Перегенерувати
-          </button>
-          <button class="qb-q-btn del" onclick="deleteQuestion(${r.q.id})">
-            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-            Видалити
+        <div class="qb-q-main">
+          <div class="qb-q-text">${r.q.question}</div>
+          <button class="qb-q-del" onclick="deleteQuestion(${i})" title="Видалити">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
           </button>
         </div>
+        <div class="qb-q-badge" style="margin-top:6px">${r.skill}</div>
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
+
+  // attach drag events
+  let dragIdx = null;
+  document.querySelectorAll('.qb-q-item').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      dragIdx = +el.dataset.idx;
+      setTimeout(() => el.classList.add('dragging'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      document.querySelectorAll('.qb-q-item').forEach(x => x.classList.remove('drag-over'));
+    });
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+      document.querySelectorAll('.qb-q-item').forEach(x => x.classList.remove('drag-over'));
+      el.classList.add('drag-over');
+    });
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      const dropIdx = +el.dataset.idx;
+      if (dragIdx === null || dragIdx === dropIdx) return;
+      const moved = qbResult.splice(dragIdx, 1)[0];
+      qbResult.splice(dropIdx, 0, moved);
+      dragIdx = null;
+      renderQBList();
+    });
+  });
 }
 
-function regenQuestion(oldId, skill) {
-  const lvlCodes = LEVEL_MAP[qbLevel];
-  const usedIds = new Set(qbResult.map(r => r.q.id));
-  const candidates = questions.filter(q =>
-    !usedIds.has(q.id) &&
-    q.levels.some(l => lvlCodes.includes(l)) &&
-    q.skill.split(',').some(t => t.trim() === skill)
-  );
-  if (!candidates.length) return;
-  const next = candidates[Math.floor(Math.random() * candidates.length)];
-  const idx = qbResult.findIndex(r => r.q.id === oldId);
-  if (idx !== -1) qbResult[idx] = {q: next, skill};
-  renderQBList();
-}
-
-function deleteQuestion(id) {
-  qbResult = qbResult.filter(r => r.q.id !== id);
+function deleteQuestion(idx) {
+  qbResult.splice(idx, 1);
   renderQBList();
 }
 
 renderDR();
 buildChips();
 renderQ();
+showPage(pageFromHash(), false);
+try { history.replaceState({page: pageFromHash()}, '', location.hash || '#d'); } catch(e){}
 
 function copyToLoop() {
   const text = qbResult.map(r => r.q.question).join('\n');
