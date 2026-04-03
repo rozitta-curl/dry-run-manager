@@ -260,6 +260,7 @@ function renderQ(){
   }).join('');
 }
 function togChk(id,el){
+  id = +id;
   checked.has(id)?(checked.delete(id),el.classList.remove('on')):(checked.add(id),el.classList.add('on'));
   updateSelectionUI();
 }
@@ -346,13 +347,36 @@ async function execDelSel(){
   buildCatOptions();renderQ();
 }
 function delSel(){ confirmDelSel(); }
-function openQModal(){
+function resetQModal(){
   document.getElementById('qt').value='';
   document.getElementById('qsk-label').textContent='Виберіть категорію';
   document.getElementById('qsk-label').style.color='var(--text3)';
   document.getElementById('qlv-label').textContent='Виберіть рівні';
   document.getElementById('qlv-label').style.color='var(--text3)';
   document.querySelectorAll('.qlv-chk').forEach(c=>c.checked=false);
+  document.querySelectorAll('.qsk-chk').forEach(c=>c.checked=false);
+  document.getElementById('q-modal-error').style.display='none';
+}
+function resetAndCloseQModal(){
+  resetQModal();
+  document.getElementById('ov-q').classList.remove('open');
+}
+function isQModalDirty(){
+  const hasText = document.getElementById('qt').value.trim().length > 0;
+  const hasLvl  = [...document.querySelectorAll('.qlv-chk:checked')].length > 0;
+  const hasCat  = [...document.querySelectorAll('.qsk-chk:checked')].length > 0;
+  return hasText || hasLvl || hasCat;
+}
+
+function tryCloseQModal(e){
+  if(e.target !== document.getElementById('ov-q')) return;
+  const text = document.getElementById('qt').value.trim();
+  if(text) document.getElementById('q-modal-error').style.display='none';
+  if(!isQModalDirty()) document.getElementById('ov-q').classList.remove('open');
+}
+
+function openQModal(){
+  resetQModal();
   rebuildQskOptions();
   document.getElementById('ov-q').classList.add('open');
 }
@@ -432,9 +456,14 @@ document.addEventListener('click',function(e){
 
 async function saveQ(){
   const text=document.getElementById('qt').value.trim();
-  if(!text){document.getElementById('qt').focus();return;}
   const skills=[...document.querySelectorAll('.qsk-chk:checked')].map(c=>c.value);
   const levels=[...document.querySelectorAll('.qlv-chk:checked')].map(c=>c.value);
+  if(!text){
+    document.getElementById('q-modal-error').style.display='block';
+    document.getElementById('qt').focus();
+    return;
+  }
+  document.getElementById('q-modal-error').style.display='none';
   questions.push({id:nid++,question:text,skill:skills.join(', '),levels});
   try { await window.storage.set('questions', JSON.stringify(questions)); } catch(e){}
   document.getElementById('ov-q').classList.remove('open');
@@ -843,7 +872,23 @@ function buildChips(){ /* no-op — kept for compatibility */ }
 (async () => {
   try {
     const stored = await window.storage.get('questions');
-    if (stored && stored.value) questions = JSON.parse(stored.value);
+    if (stored && stored.value) {
+      questions = JSON.parse(stored.value);
+      // Fix any duplicate IDs
+      const seenIds = new Set();
+      let maxId = Math.max(...questions.map(q => q.id), 199);
+      questions = questions.map(q => {
+        if(seenIds.has(q.id)){
+          maxId++;
+          return {...q, id: maxId};
+        }
+        seenIds.add(q.id);
+        return q;
+      });
+      nid = maxId + 1;
+      // Save back with fixed IDs
+      try { await window.storage.set('questions', JSON.stringify(questions)); } catch(e2){}
+    }
   } catch(e) {}
 
   selLvl = null;
@@ -924,6 +969,10 @@ window.selAll = selAll;
 window.confirmDelSel = confirmDelSel;
 window.execDelSel = execDelSel;
 window.delSel = delSel;
+window.resetQModal = resetQModal;
+window.resetAndCloseQModal = resetAndCloseQModal;
+window.isQModalDirty = isQModalDirty;
+window.tryCloseQModal = tryCloseQModal;
 window.openQModal = openQModal;
 window.rebuildQskOptions = rebuildQskOptions;
 window.onQlvChange = onQlvChange;

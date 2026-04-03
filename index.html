@@ -295,7 +295,7 @@ select.fi{background:var(--white)}
       <svg width="14" height="14" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Нове питання
     </button>
-    <button class="btn-s" onclick="document.getElementById('fu').click()">
+    <button class="btn-s" disabled style="opacity:.4;cursor:not-allowed" onclick="document.getElementById('fu').click()">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Завантажити файл
     </button>
@@ -361,7 +361,7 @@ select.fi{background:var(--white)}
 <div class="ov" id="ov-del-confirm" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal">
     <h2 style="margin-bottom:8px">Видалити питання?</h2>
-    <p style="font-size:14px;color:var(--text2);margin-bottom:24px">Хочете видалити вибрані питання?</p>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:24px">Питання буде видалено зі списку всіх питань</p>
     <div class="ma">
       <button class="btn-s" onclick="document.getElementById('ov-del-confirm').classList.remove('open')">Відмінити</button>
       <button class="btn-p" style="background:#ef4444;border-color:#ef4444" onclick="execDelSel()">Видалити</button>
@@ -392,9 +392,10 @@ select.fi{background:var(--white)}
 </div>
 
 <!-- Q Modal -->
-<div class="ov" id="ov-q" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="ov" id="ov-q" onclick="tryCloseQModal(event)">
   <div class="modal">
     <h2>Нове питання</h2>
+    <div id="q-modal-error" style="display:none;color:#ef4444;font-size:13px;margin-bottom:12px;padding:8px 12px;background:#fff5f5;border:1px solid #fecaca;border-radius:var(--rs)">Будь ласка, заповніть поля</div>
     <div class="fg">
       <label class="fl">Рівні</label>
       <div class="lvl-filter" id="qlv-filter" style="width:100%">
@@ -422,9 +423,9 @@ select.fi{background:var(--white)}
         </div>
       </div>
     </div>
-    <div class="fg"><label class="fl">Текст питання</label><textarea class="fi" id="qt" rows="3" placeholder="Введіть питання"></textarea></div>
+    <div class="fg"><label class="fl">Текст питання</label><textarea class="fi" id="qt" rows="3" placeholder="Введіть питання" oninput="if(this.value.trim())document.getElementById('q-modal-error').style.display='none'"></textarea></div>
     <div class="ma">
-      <button class="btn-s" onclick="document.getElementById('ov-q').classList.remove('open')">Скасувати</button>
+      <button class="btn-s" onclick="resetAndCloseQModal()">Скасувати</button>
       <button class="btn-p" onclick="saveQ()">Додати</button>
     </div>
   </div>
@@ -693,6 +694,7 @@ function renderQ(){
   }).join('');
 }
 function togChk(id,el){
+  id = +id;
   checked.has(id)?(checked.delete(id),el.classList.remove('on')):(checked.add(id),el.classList.add('on'));
   updateSelectionUI();
 }
@@ -779,13 +781,36 @@ async function execDelSel(){
   buildCatOptions();renderQ();
 }
 function delSel(){ confirmDelSel(); }
-function openQModal(){
+function resetQModal(){
   document.getElementById('qt').value='';
   document.getElementById('qsk-label').textContent='Виберіть категорію';
   document.getElementById('qsk-label').style.color='var(--text3)';
   document.getElementById('qlv-label').textContent='Виберіть рівні';
   document.getElementById('qlv-label').style.color='var(--text3)';
   document.querySelectorAll('.qlv-chk').forEach(c=>c.checked=false);
+  document.querySelectorAll('.qsk-chk').forEach(c=>c.checked=false);
+  document.getElementById('q-modal-error').style.display='none';
+}
+function resetAndCloseQModal(){
+  resetQModal();
+  document.getElementById('ov-q').classList.remove('open');
+}
+function isQModalDirty(){
+  const hasText = document.getElementById('qt').value.trim().length > 0;
+  const hasLvl  = [...document.querySelectorAll('.qlv-chk:checked')].length > 0;
+  const hasCat  = [...document.querySelectorAll('.qsk-chk:checked')].length > 0;
+  return hasText || hasLvl || hasCat;
+}
+
+function tryCloseQModal(e){
+  if(e.target !== document.getElementById('ov-q')) return;
+  const text = document.getElementById('qt').value.trim();
+  if(text) document.getElementById('q-modal-error').style.display='none';
+  if(!isQModalDirty()) document.getElementById('ov-q').classList.remove('open');
+}
+
+function openQModal(){
+  resetQModal();
   rebuildQskOptions();
   document.getElementById('ov-q').classList.add('open');
 }
@@ -865,9 +890,14 @@ document.addEventListener('click',function(e){
 
 async function saveQ(){
   const text=document.getElementById('qt').value.trim();
-  if(!text){document.getElementById('qt').focus();return;}
   const skills=[...document.querySelectorAll('.qsk-chk:checked')].map(c=>c.value);
   const levels=[...document.querySelectorAll('.qlv-chk:checked')].map(c=>c.value);
+  if(!text){
+    document.getElementById('q-modal-error').style.display='block';
+    document.getElementById('qt').focus();
+    return;
+  }
+  document.getElementById('q-modal-error').style.display='none';
   questions.push({id:nid++,question:text,skill:skills.join(', '),levels});
   try { await window.storage.set('questions', JSON.stringify(questions)); } catch(e){}
   document.getElementById('ov-q').classList.remove('open');
@@ -1276,7 +1306,23 @@ function buildChips(){ /* no-op — kept for compatibility */ }
 (async () => {
   try {
     const stored = await window.storage.get('questions');
-    if (stored && stored.value) questions = JSON.parse(stored.value);
+    if (stored && stored.value) {
+      questions = JSON.parse(stored.value);
+      // Fix any duplicate IDs
+      const seenIds = new Set();
+      let maxId = Math.max(...questions.map(q => q.id), 199);
+      questions = questions.map(q => {
+        if(seenIds.has(q.id)){
+          maxId++;
+          return {...q, id: maxId};
+        }
+        seenIds.add(q.id);
+        return q;
+      });
+      nid = maxId + 1;
+      // Save back with fixed IDs
+      try { await window.storage.set('questions', JSON.stringify(questions)); } catch(e2){}
+    }
   } catch(e) {}
 
   selLvl = null;
