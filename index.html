@@ -446,13 +446,17 @@ let dryRuns=[
   {id:3,name:'Дмитро Шевченко',level:'Senior',date:'2026-01-15T14:00',rm:'Марія Іваненко',iv:'Олег'},
 ];
 
+const PAGE_HASH = { d: 'Dashboard', q: 'Questions' };
+const HASH_PAGE = { Dashboard: 'd', Questions: 'q' };
+
 function showPage(p, pushState=true){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   const nbEl = document.getElementById('nb-'+p);
   if(nbEl) nbEl.classList.add('active');
-  try { if(pushState && location.hash !== '#'+p) history.pushState({page:p}, '', '#'+p); } catch(e){}
+  const hash = '#' + (PAGE_HASH[p] || 'Dashboard');
+  try { if(pushState && location.hash !== hash) history.pushState({page:p}, '', hash); } catch(e){}
 }
 
 window.addEventListener('popstate', e => {
@@ -461,7 +465,7 @@ window.addEventListener('popstate', e => {
 });
 
 function pageFromHash(){
-  try { const h = location.hash.replace('#',''); return ['d','q'].includes(h) ? h : 'd'; } catch(e){ return 'd'; }
+  try { const h = location.hash.replace('#',''); return HASH_PAGE[h] || 'd'; } catch(e){ return 'd'; }
 }
 
 // DASHBOARD
