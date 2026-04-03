@@ -1,13 +1,20 @@
 const QDB=[{"id":1,"question":"Could you please tell us briefly about yourself and your experience?","skill":"General","levels":["A1","A2","A3","A4"]},{"id":2,"question":"Could you please tell what type of projects are interesting for you? On what you would prefer to work UI or UX?","skill":"General","levels":["A1","A2"]},{"id":3,"question":"On example of one of your previous projects could you please describe your working process?","skill":"Design Process","levels":["A1","A2","A3","A4"]},{"id":4,"question":"Let's imagine that you are assigned to the project and will need to redesign the existing site. What steps you will take to do it and why?","skill":"Design Process","levels":["A2","A3"]},{"id":5,"question":"You are assigned to the new feature development, and you need to provide the design solution. Previously discovery and research phases were already conducted. How will you start your work?","skill":"Design Process","levels":["A1","A2"]},{"id":6,"question":"What if after analyzing all materials you find out that you don't have enough information to understand the problem statement and propose the solution?","skill":"Design Process","levels":["A1","A2"]},{"id":7,"question":"Imagine you're tasked with designing an app feature. How would you start, and what would be your steps?","skill":"Design Process","levels":["A1","A2","A3","A4"]},{"id":8,"question":"Let's imagine that you are the only designer who will work on a new feature for a project. Could you please describe how you will plan your work and activities needed for the project?","skill":"Design Process","levels":["A2","A3","A4"]},{"id":9,"question":"Let's imagine that you have a task to develop a new concept for some feature on a project. How you will handle this process?","skill":"Design Process, Design Concept","levels":["A2","A3"]},{"id":10,"question":"What design documentation do you prepare on each phase of the design process? What is the goal of this documentation?","skill":"UX Documentation","levels":["A1","A2","A3","A4"]},{"id":11,"question":"What if after analyzing all materials you find out that you don't have enough information to understand the problem statement and propose the solution?","skill":"Requirements gathering","levels":["A1","A2"]},{"id":12,"question":"What would you do in case you received a task but do not fully understand it's requirements?","skill":"Requirements gathering","levels":["A1","A2"]},{"id":13,"question":"What you will do in case project requirements conflicting between stakeholders?","skill":"Requirements gathering, stakeholder management","levels":["A2","A3","A4"]},{"id":14,"question":"How the gathered information on the discovery and research phases helps you to make design decisions for your project?","skill":"Discovery, Research","levels":["A2","A3"]},{"id":15,"question":"Do you have experience working with Accessibility standards? If on your new project clients say that this is one of the priorities now, our product should follow these standards, what your process will look like?","skill":"Accessibility","levels":["A2","A3"]},{"id":16,"question":"Let's imagine that you are working on some feature for our platform, and you need to understand whether the solution will work. What you will be doing?","skill":"Validation","levels":["A2","A3"]},{"id":17,"question":"How would you validate your design solution in case you won't have an access to the users?","skill":"Validation","levels":["A2","A3"]},{"id":18,"question":"What validation methodologies are you used previously? Could you please describe some validation activity you conducted or participated in and what you received as an outcome?","skill":"Validation","levels":["A1","A2","A3"]},{"id":19,"question":"Can you walk us through your design process from lo-fi to final visual design?","skill":"Visual","levels":["A2","A3"]},{"id":20,"question":"Do you have experience with the data visualisation creation? What tools and techniques do you commonly use for creating data visualizations?","skill":"Visual","levels":["A2","A3"]},{"id":21,"question":"Can you share a project you're most proud of from a visual design perspective? What made it stand out?","skill":"Visual Design","levels":["A2","A3","A4"]},{"id":22,"question":"What methodologies or tools do you typically use to conduct visual research for a new project?","skill":"Visual Research","levels":["A2","A3","A4"]},{"id":23,"question":"Imagine you're presenting a new design concept to a client. How would you explain the rationale behind your design choices in a way they would understand?","skill":"Visual Design, Presentation","levels":["A2","A3","A4"]},{"id":24,"question":"Can you describe a time when you went beyond the client's expectations and provided a solution or concept that had the wow factor? What made it successful?","skill":"Visual Design, Design Concept","levels":["A2","A3","A4"]},{"id":25,"question":"What are the advantages and disadvantages of the design system?","skill":"Design System","levels":["A1","A2","A3"]},{"id":26,"question":"How you understand the difference between the DS, style guide and design library?","skill":"Design System","levels":["A1","A2"]},{"id":27,"question":"Let's imagine that you will need to build the design system from scratch. What will be your steps in this process, did you have similar experience?","skill":"Design System","levels":["A2","A3"]},{"id":28,"question":"You need to add or change something in the UI library, which is used by different teams. What will you do in this case?","skill":"Design System","levels":["A1","A2","A3"]},{"id":29,"question":"How do you approach designing for different platforms (e.g., web, mobile) to maintain a consistent visual style?","skill":"Design System, Consistency","levels":["A1","A2","A3"]},{"id":30,"question":"Could you please show an example how you usually prepare style guide pages or component specifications?","skill":"Design System","levels":["A1","A2"]},{"id":31,"question":"Let's imagine that you are working on the new feature that requires a component that is missing from the DS. What will you do in this case?","skill":"Design System","levels":["A1","A2","A3"]},{"id":32,"question":"What is design tokens and what is the value of using them?","skill":"Design System","levels":["A1","A2","A3"]},{"id":33,"question":"What is your approach to managing typography, colors, and spacing in Figma?","skill":"Figma","levels":["A1","A2"]},{"id":34,"question":"What is the difference between Figma styles and variables? When would you recommend to use what?","skill":"Figma","levels":["A1","A2"]},{"id":35,"question":"How do you manage responsiveness in Figma designs?","skill":"Figma","levels":["A1","A2"]},{"id":36,"question":"How do you structure and organize Figma files to keep them efficient, especially when working with large projects or multiple contributors?","skill":"Figma","levels":["A1","A2","A3"]},{"id":37,"question":"Could you please describe how do you collaborate with developers? How will you pass the hand-off for the development?","skill":"Dev collaboration","levels":["A1","A2","A3"]},{"id":38,"question":"Let's imagine that the dev team previously doesn't work with the designer. How would you set up collaboration with them?","skill":"Dev collaboration","levels":["A2","A3"]},{"id":39,"question":"You are presenting your work for the development team and receive feedback that it will be technically impossible to implement proposed solution. What you will be doing?","skill":"Dev collaboration","levels":["A1","A2","A3"]},{"id":40,"question":"How do you maintain ongoing collaboration with the developers during the project?","skill":"Dev collaboration","levels":["A2","A3"]},{"id":41,"question":"What happens after hand-off? How are you ensure that the solution was implemented according to the mockups?","skill":"Dev collaboration","levels":["A1","A2","A3"]},{"id":42,"question":"You worked on the mockups to cover some user flow. How you will prepare the hand-off before passing it to the dev team?","skill":"Dev collaboration","levels":["A1","A2","A3"]},{"id":43,"question":"How do you imagine ideal handoff to development?","skill":"Hand-off to development","levels":["A1","A2","A3","A4"]},{"id":44,"question":"How do you stay updated with the latest design trends and incorporate them into your work?","skill":"Trends","levels":["A2","A3"]},{"id":45,"question":"How do you typically collaborate with other UX/UI designers on a project?","skill":"Team Work","levels":["A1","A2","A3"]},{"id":46,"question":"Did you have experience working in the design team? What was your role and responsibilities?","skill":"Team Work","levels":["A1","A2","A3"]},{"id":47,"question":"Can you share an experience where you had to resolve a design disagreement with a teammate?","skill":"Team Work","levels":["A2","A3"]},{"id":48,"question":"How do you approach giving constructive feedback to other designers?","skill":"Team Work","levels":["A2","A3"]},{"id":49,"question":"How would you handle case if the team lead or other designers do not agree with your design solution?","skill":"Team Work","levels":["A1","A2","A3"]},{"id":50,"question":"How do you usually present your work accounting different roles (devs, business, designers)?","skill":"Presentation","levels":["A1","A2","A3"]},{"id":51,"question":"What do you do when stakeholders request changes that might negatively impact the visual design?","skill":"Client communication, Argumentation","levels":["A2","A3"]},{"id":52,"question":"What will be your actions in case PO/client/dev disagrees with all your ideas and pushes his own?","skill":"Client communication, Argumentation","levels":["A1","A2","A3"]},{"id":53,"question":"How you will handle if client has a straight vision on how something should be done, but you have your own opinion?","skill":"Client communication, Argumentation","levels":["A2","A3"]},{"id":54,"question":"Client come to you with an urgent request to quickly prepare a lot of mockups for the next day. How would you handle this situation?","skill":"Client communication, Argumentation","levels":["A2","A3"]},{"id":55,"question":"Do you use any frameworks (e.g., t-shirt sizing, story points) for estimating UX work?","skill":"Managing Workload, Estimation, Prioritization","levels":["A2","A3"]},{"id":56,"question":"What do you account for when estimating your work?","skill":"Managing Workload, Estimation, Prioritization","levels":["A2","A3"]},{"id":57,"question":"What do you do if a task takes significantly longer than estimated?","skill":"Managing Workload, Estimation, Prioritization","levels":["A1","A2","A3"]},{"id":58,"question":"How do you usually prioritize design work across several different features?","skill":"Managing Workload, Estimation, Prioritization","levels":["A2","A3"]},{"id":59,"question":"Have you previously had any difficulties in meeting project deadlines? How did you handle such cases?","skill":"Managing Workload, Estimation, Prioritization","levels":["A1","A2","A3"]},{"id":60,"question":"Let's imagine that two POs from different streams ask you to create mockups at one moment. What would you do?","skill":"Managing Workload, Estimation, Prioritization","levels":["A2","A3"]},{"id":61,"question":"Let's imagine that you will work on two streams in parallel. How would you manage your workload?","skill":"Workload Management","levels":["A2","A3","A4"]},{"id":62,"question":"PO come to you with an urgent request to quickly prepare a lot of mockups for the next day. How would you handle?","skill":"Workload Management","levels":["A2","A3","A4"]},{"id":63,"question":"If on a project you see some areas that could be improved but they weren't in initial plan or scope, what you will do?","skill":"Proactiveness","levels":["A2","A3"]},{"id":64,"question":"Let's imagine that you noticed communication gaps in a project. What will you do?","skill":"Proactiveness","levels":["A2","A3"]},{"id":65,"question":"After understanding high-level requirements, you created several design options. How would you decide which solution to present given limited time?","skill":"Ownership","levels":["A1","A2"]},{"id":66,"question":"If on a project you see areas that could be improved but weren't in scope, what will you do?","skill":"Proactiveness, Ownership","levels":["A2","A3","A4"]},{"id":67,"question":"What would you do in case your team lead or team members don't agree with your proposed design solution?","skill":"Work with feedback","levels":["A1","A2","A3"]},{"id":68,"question":"Let's imagine that you are presenting your design solution to a customer. What would you do if they disagree?","skill":"Work with feedback","levels":["A1","A2","A3","A4"]},{"id":69,"question":"A client gives you vague feedback like 'This doesn't feel bold and exciting enough.' How would you interpret and use it?","skill":"Work with Feedback","levels":["A2","A3","A4"]},{"id":70,"question":"What was your biggest challenge in the work? How you handle it?","skill":"Maturity","levels":["A2","A3","A4"]},{"id":71,"question":"What do you think is your strength (primary skills)?","skill":"Maturity","levels":["A1","A2"]},{"id":72,"question":"In what cases would you use checkbox vs radiobutton vs toggle vs select in UI?","skill":"UI controls knowledge","levels":["A1"]},{"id":73,"question":"When preparing mockups for a feature, how do you ensure its consistency with the rest of the application?","skill":"Work with mockups, consistency","levels":[]},{"id":74,"question":"How do you ensure consistency in your designs?","skill":"Design System, Consistency","levels":["A1","A2","A3"]},{"id":75,"question":"How would you organize your files and mockups to keep designs clean, shareable, and easy to navigate?","skill":"Figma","levels":["A1","A2"]},{"id":76,"question":"After understanding high-level requirements, you created several options. How would you decide which solution to present?","skill":"Ownership","levels":["A2","A3","A4"]},{"id":77,"question":"You prepared some feature and need to understand whether the solution will work. What will you do?","skill":"Validation","levels":["A1","A2"]},{"id":78,"question":"Imagine a client is starting a new business and approaches you for a full branding package. How would you approach this project?","skill":"Visual Design, Design process, Stakeholder Management","levels":["A3","A4"]},{"id":79,"question":"Can you share an example of collaborating with stakeholders who had very different creative preferences? How did you manage?","skill":"Visual Design, Stakeholder Management","levels":["A3","A4"]},{"id":80,"question":"Which project are you proud of and why, from a visual point of view?","skill":"Visual Design","levels":["A1","A2","A3","A4"]},{"id":81,"question":"How would you ensure all visual assets align with the brand identity, target audience and product strategy?","skill":"Visual Research / Branding","levels":["A3","A4"]},{"id":82,"question":"When working with copywriters, UX/UI specialists, or developers, how do you ensure everything aligns seamlessly?","skill":"Visual Design, Collaboration Across Teams","levels":["A3","A4"]},{"id":83,"question":"What do you think distinguishes you from other designers in terms of your ability to add value?","skill":"Maturity","levels":["A3","A4"]}];
 
-// Storage polyfill for non-Claude environments
+// Storage polyfill for non-Claude environments — uses localStorage for persistence
 if (!window.storage) {
-  const _store = {};
   window.storage = {
-    get: async (k) => _store[k] ? {value: _store[k]} : null,
-    set: async (k, v) => { _store[k] = v; return {key:k,value:v}; },
-    delete: async (k) => { delete _store[k]; return {key:k,deleted:true}; },
-    list: async (prefix) => { return {keys: Object.keys(_store).filter(k=>!prefix||k.startsWith(prefix))}; }
+    get: async (k) => {
+      try { const v = localStorage.getItem(k); return v !== null ? {value: v} : null; } catch(e){ return null; }
+    },
+    set: async (k, v) => {
+      try { localStorage.setItem(k, v); return {key:k,value:v}; } catch(e){ return null; }
+    },
+    delete: async (k) => {
+      try { localStorage.removeItem(k); return {key:k,deleted:true}; } catch(e){ return null; }
+    },
+    list: async (prefix) => {
+      try { const keys=Object.keys(localStorage).filter(k=>!prefix||k.startsWith(prefix)); return {keys}; } catch(e){ return {keys:[]}; }
+    }
   };
 }
 
@@ -94,26 +101,53 @@ function saveDR(){
 const LVL_LABELS = {A1:'Junior', A2:'Middle', A3:'Senior', A4:'Lead'};
 const LVL_CODES = ['A1','A2','A3','A4'];
 
-function buildChips(){ /* no-op */ }
+function onQsInput(){
+  const w=document.getElementById('qs-wrapper');
+  if(w) w.classList.toggle('has-value', document.getElementById('qs').value.length>0);
+  renderQ();
+}
+function clearQs(){
+  const inp=document.getElementById('qs');
+  inp.value='';
+  inp.focus();
+  const w=document.getElementById('qs-wrapper');
+  if(w) w.classList.remove('has-value');
+  renderQ();
+}
 
 function positionDropdown(btn, dropdown) {
   const r = btn.getBoundingClientRect();
-  const dropH = dropdown.offsetHeight;
-  const spaceBelow = window.innerHeight - r.bottom;
-  if (spaceBelow >= dropH + 8 || spaceBelow >= 120) {
+  const maxH = parseInt(dropdown.style.maxHeight) || 260;
+  const spaceBelow = window.innerHeight - r.bottom - 8;
+  if (spaceBelow >= 120) {
     dropdown.style.top = (r.bottom + 6) + 'px';
     dropdown.style.bottom = 'auto';
+    dropdown.style.maxHeight = Math.min(maxH, spaceBelow) + 'px';
   } else {
-    dropdown.style.bottom = (window.innerHeight - r.top + 6) + 'px';
+    const spaceAbove = r.top - 8;
     dropdown.style.top = 'auto';
+    dropdown.style.bottom = (window.innerHeight - r.top + 6) + 'px';
+    dropdown.style.maxHeight = Math.min(maxH, spaceAbove) + 'px';
   }
   dropdown.style.left = r.left + 'px';
-  // prevent going off right edge
-  const dropW = dropdown.offsetWidth;
+  const dropW = dropdown.offsetWidth || 220;
   if (r.left + dropW > window.innerWidth - 8) {
     dropdown.style.left = (window.innerWidth - dropW - 8) + 'px';
   }
 }
+
+// Reposition open dropdowns on scroll
+window.addEventListener('scroll', function() {
+  const pairs = [
+    ['lvl-filter-btn','lvl-dropdown'],
+    ['cat-filter-btn','cat-dropdown'],
+  ];
+  pairs.forEach(([btnId, dropId]) => {
+    const d = document.getElementById(dropId);
+    const btn = document.getElementById(btnId);
+    if(d && btn && d.classList.contains('open')) positionDropdown(btn, d);
+  });
+}, true);
 function toggleLvlDropdown(){
   const d = document.getElementById('lvl-dropdown');
   const btn = document.getElementById('lvl-filter-btn');
@@ -122,44 +156,28 @@ function toggleLvlDropdown(){
 }
 function closeLvlDropdown(){ document.getElementById('lvl-dropdown').classList.remove('open'); }
 
-// null = all selected, [] = none selected, [...] = some selected
-// We track: selLvl=null means "All", selLvl=[] means "none", selLvl=[...] means partial
-
 function toggleLvlAll(){
   const allChk = document.getElementById('lvl-chk-all');
-  if(selLvl === null){
-    // All → uncheck everything
-    selLvl = [];
-    allChk.checked = false; allChk.indeterminate = false;
-    document.querySelectorAll('.lvl-chk').forEach(c => c.checked = false);
-  } else {
-    // partial or none → select all
-    selLvl = null;
-    allChk.checked = true; allChk.indeterminate = false;
-    document.querySelectorAll('.lvl-chk').forEach(c => c.checked = true);
-  }
+  const checked = allChk.checked; // browser already toggled it
+  selLvl = null;
+  document.querySelectorAll('.lvl-chk').forEach(c => c.checked = checked);
   updateLvlLabel(); renderQ();
 }
 function updateLvlFilter(){
   const checked = [...document.querySelectorAll('.lvl-chk:checked')].map(c => c.value);
   const allChk = document.getElementById('lvl-chk-all');
-  if(checked.length === LVL_CODES.length){
+  if(checked.length === 0){
     selLvl = null;
-    allChk.checked = true; allChk.indeterminate = false;
-    document.querySelectorAll('.lvl-chk').forEach(c => c.checked = true);
-  } else if(checked.length === 0){
-    selLvl = [];
-    allChk.checked = false; allChk.indeterminate = false;
+    allChk.checked = false;
   } else {
     selLvl = checked;
-    allChk.checked = false; allChk.indeterminate = true;
+    allChk.checked = false;
   }
   updateLvlLabel(); renderQ();
 }
 function updateLvlLabel(){
   const label = document.getElementById('lvl-filter-label');
-  if(selLvl === null){ label.textContent = 'Всі рівні'; return; }
-  if(selLvl.length === 0){ label.textContent = 'Рівень не обраний'; return; }
+  if(selLvl === null || selLvl.length === 0){ label.textContent = 'Всі рівні'; return; }
   if(selLvl.length === 1){ label.textContent = LVL_LABELS[selLvl[0]]; return; }
   label.textContent = selLvl.map(l => LVL_LABELS[l]).join(', ');
 }
@@ -170,13 +188,16 @@ document.addEventListener('click', function(e){
 });
 
 // Category filter
-let selCat = null; // null=all, []=none, [...]=partial
+let selCat = null;
 
 function buildCatOptions() {
   const cats = [...new Set(questions.flatMap(q => getSkills(q)))].sort((a,b) => a.localeCompare(b));
   document.getElementById('cat-options').innerHTML = cats.map(c =>
-    `<label class="lvl-option"><input type="checkbox" class="cat-chk" value="${c.replace(/"/g,'&quot;')}" onchange="updateCatFilter()" checked/><span>${c}</span></label>`
+    `<label class="lvl-option"><input type="checkbox" class="cat-chk" value="${c.replace(/"/g,'&quot;')}" onchange="updateCatFilter()"/><span>${c}</span></label>`
   ).join('');
+  // all unchecked by default (visually), selCat=null means show all
+  const allChk = document.getElementById('cat-chk-all');
+  if(allChk){ allChk.checked = false; allChk.indeterminate = false; }
 }
 
 function toggleCatDropdown(){
@@ -189,39 +210,26 @@ function closeCatDropdown(){ document.getElementById('cat-dropdown').classList.r
 
 function toggleCatAll(){
   const allChk = document.getElementById('cat-chk-all');
-  if(selCat === null){
-    // All → uncheck everything
-    selCat = [];
-    allChk.checked = false; allChk.indeterminate = false;
-    document.querySelectorAll('.cat-chk').forEach(c => c.checked = false);
-  } else {
-    // partial or none → select all
-    selCat = null;
-    allChk.checked = true; allChk.indeterminate = false;
-    document.querySelectorAll('.cat-chk').forEach(c => c.checked = true);
-  }
+  const checked = allChk.checked;
+  selCat = null;
+  document.querySelectorAll('.cat-chk').forEach(c => c.checked = checked);
   updateCatLabel(); renderQ();
 }
 function updateCatFilter(){
   const checked = [...document.querySelectorAll('.cat-chk:checked')].map(c => c.value);
-  const total = document.querySelectorAll('.cat-chk').length;
   const allChk = document.getElementById('cat-chk-all');
-  if(checked.length === total){
+  if(checked.length === 0){
     selCat = null;
-    allChk.checked = true; allChk.indeterminate = false;
-  } else if(checked.length === 0){
-    selCat = [];
-    allChk.checked = false; allChk.indeterminate = false;
+    allChk.checked = false;
   } else {
     selCat = checked;
-    allChk.checked = false; allChk.indeterminate = true;
+    allChk.checked = false;
   }
   updateCatLabel(); renderQ();
 }
 function updateCatLabel(){
   const label = document.getElementById('cat-filter-label');
-  if(selCat === null){ label.textContent = 'Всі категорії'; return; }
-  if(selCat.length === 0){ label.textContent = 'Категорія не обрана'; return; }
+  if(selCat === null || selCat.length === 0){ label.textContent = 'Всі категорії'; return; }
   if(selCat.length === 1){ label.textContent = selCat[0]; return; }
   label.textContent = `${selCat.length} категорії`;
 }
@@ -232,24 +240,13 @@ document.addEventListener('click', function(e){
 });
 function renderQ(){
   const s=(document.getElementById('qs').value||'').toLowerCase();
-  const noLevel = selLvl !== null && selLvl.length === 0;
-  const noCat   = selCat !== null && selCat.length === 0;
-  const emptyIcon = `<svg width="40" height="40" fill="none" stroke="#D4D4D8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M11 8v3l2 2"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`;
-  if(noLevel){
-    document.getElementById('q-list').innerHTML=`<div class="empty" style="padding:48px 24px">${emptyIcon}<p style="margin-top:12px;font-size:14px;color:var(--text2)">Виберіть хоча б один рівень</p></div>`;
-    return;
-  }
-  if(noCat){
-    document.getElementById('q-list').innerHTML=`<div class="empty" style="padding:48px 24px">${emptyIcon}<p style="margin-top:12px;font-size:14px;color:var(--text2)">Виберіть хоча б одну категорію</p></div>`;
-    return;
-  }
   let fil=questions;
   if(selLvl !== null && selLvl.length) fil=fil.filter(q=>selLvl.some(l=>q.levels.includes(l)));
-  if(selCat !== null && selCat.length) fil=fil.filter(q=>getSkills(q).some(s=>selCat.includes(s)));
+  if(selCat !== null && selCat.length) fil=fil.filter(q=>getSkills(q).some(sk=>selCat.includes(sk)));
   if(s) fil=fil.filter(q=>q.question.toLowerCase().includes(s)||q.skill.toLowerCase().includes(s));
   if(!fil.length){document.getElementById('q-list').innerHTML='<div class="empty"><p>Питань не знайдено</p></div>';return;}
   document.getElementById('q-list').innerHTML=fil.map(q=>{
-    const skills = getSkills(q).map(s=>`<span class="stag">${s}</span>`).join('');
+    const skills = getSkills(q).map(sk=>`<span class="stag">${sk}</span>`).join('');
     return`<div class="q-row" id="qrow-${q.id}">
       <div class="qck ${checked.has(q.id)?'on':''}" onclick="togChk(${q.id},this)"></div>
       <div class="q-body">
@@ -841,26 +838,30 @@ function deleteQuestion(idx) {
   renderQBList();
 }
 
+function buildChips(){ /* no-op — kept for compatibility */ }
+
 (async () => {
-  // Load persisted questions if any
   try {
     const stored = await window.storage.get('questions');
-    if (stored) questions = JSON.parse(stored.value);
+    if (stored && stored.value) questions = JSON.parse(stored.value);
   } catch(e) {}
 
-  renderDR();
-  buildChips();
-  buildCatOptions();
   selLvl = null;
   selCat = null;
-  document.getElementById('lvl-chk-all').checked = true;
-  document.querySelectorAll('.lvl-chk').forEach(c => c.checked = true);
-  updateLvlLabel();
-  document.getElementById('cat-chk-all').checked = true;
-  updateCatLabel();
-  renderQ();
-  showPage(pageFromHash(), false);
-  try { history.replaceState({page: pageFromHash()}, '', location.hash || '#Dashboard'); } catch(e){}
+
+  try {
+    renderDR();
+    buildChips();
+    buildCatOptions();
+    updateLvlLabel();
+    updateCatLabel();
+    renderQ();
+    showPage(pageFromHash(), false);
+    try { history.replaceState({page: pageFromHash()}, '', location.hash || '#Dashboard'); } catch(e){}
+  } catch(err) {
+    console.error('Init error:', err);
+    try { renderQ(); } catch(e2) {}
+  }
 })();
 
 function copyToLoop() {
@@ -898,7 +899,8 @@ window.isUp = isUp;
 window.renderDR = renderDR;
 window.openDRModal = openDRModal;
 window.saveDR = saveDR;
-window.buildChips = buildChips;
+window.onQsInput = onQsInput;
+window.clearQs = clearQs;
 window.positionDropdown = positionDropdown;
 window.toggleLvlDropdown = toggleLvlDropdown;
 window.closeLvlDropdown = closeLvlDropdown;
@@ -954,6 +956,7 @@ window.buildQuestions = buildQuestions;
 window.appendQuestions = appendQuestions;
 window.renderQBList = renderQBList;
 window.deleteQuestion = deleteQuestion;
+window.buildChips = buildChips;
 window.copyToLoop = copyToLoop;
 window.copyToExcel = copyToExcel;
 window.copyText = copyText;
