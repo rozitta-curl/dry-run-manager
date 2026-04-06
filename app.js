@@ -26,8 +26,8 @@ let dryRuns=[
   {id:3,name:'Дмитро Шевченко',level:'Senior',date:'2026-01-15T14:00',rm:'Марія Іваненко',iv:'Олег'},
 ];
 
-const PAGE_HASH = { d: 'Dashboard', q: 'Questions' };
-const HASH_PAGE = { Dashboard: 'd', Questions: 'q' };
+const PAGE_HASH = { d: 'Questions', q: 'Admin' };
+const HASH_PAGE = { Questions: 'd', Admin: 'q' };
 
 function showPage(p, pushState=true){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
@@ -247,11 +247,12 @@ function renderQ(){
   if(!fil.length){document.getElementById('q-list').innerHTML='<div class="empty"><p>Питань не знайдено</p></div>';return;}
   document.getElementById('q-list').innerHTML=fil.map(q=>{
     const skills = getSkills(q).map(sk=>`<span class="stag">${sk}</span>`).join('');
+    const escapedQ = q.question.replace(/'/g, "\\'").replace(/"/g, '&quot;');
     return`<div class="q-row" id="qrow-${q.id}">
       <div class="qck ${checked.has(q.id)?'on':''}" onclick="togChk(${q.id},this)"></div>
       <div class="q-body">
         <div class="q-txt" id="qtxt-${q.id}">${q.question}</div>
-        <div class="q-tags">${skills}</div>
+        <div class="q-tags" style="align-items:center;gap:6px">${skills}<button class="q-copy-btn" onclick="copyQText(this,'${escapedQ}')">Копіювати</button></div>
       </div>
       <button class="q-edit-btn" onclick="startEditQ(${q.id})" title="Редагувати">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -259,8 +260,22 @@ function renderQ(){
     </div>`;
   }).join('');
 }
+function copyQText(btn, text){
+  navigator.clipboard.writeText(text).then(()=>{
+    const orig = btn.textContent;
+    btn.textContent = '✓ Скопійовано';
+    setTimeout(()=>{ btn.textContent = orig; }, 1500);
+  }).catch(()=>{
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText='position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    const orig = btn.textContent;
+    btn.textContent = '✓ Скопійовано';
+    setTimeout(()=>{ btn.textContent = orig; }, 1500);
+  });
+}
 function togChk(id,el){
-  id = +id;
   checked.has(id)?(checked.delete(id),el.classList.remove('on')):(checked.add(id),el.classList.add('on'));
   updateSelectionUI();
 }
@@ -826,10 +841,13 @@ function renderQBList() {
         <div class="qb-q-main">
           <div class="qb-q-text">${r.q.question}</div>
           <button class="qb-q-del" onclick="deleteQuestion(${i})" title="Видалити">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
-        <div class="qb-q-badge" style="margin-top:6px">${r.skill}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+          <div class="qb-q-badge">${r.skill}</div>
+          <button class="q-copy-btn" onclick="copyQText(this,'${r.q.question.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">Копіювати</button>
+        </div>
       </div>
     </div>`).join('');
 
@@ -902,7 +920,7 @@ function buildChips(){ /* no-op — kept for compatibility */ }
     updateCatLabel();
     renderQ();
     showPage(pageFromHash(), false);
-    try { history.replaceState({page: pageFromHash()}, '', location.hash || '#Dashboard'); } catch(e){}
+    try { history.replaceState({page: pageFromHash()}, '', location.hash || '#Questions'); } catch(e){}
   } catch(err) {
     console.error('Init error:', err);
     try { renderQ(); } catch(e2) {}
@@ -959,6 +977,7 @@ window.toggleCatAll = toggleCatAll;
 window.updateCatFilter = updateCatFilter;
 window.updateCatLabel = updateCatLabel;
 window.renderQ = renderQ;
+window.copyQText = copyQText;
 window.togChk = togChk;
 window.updateSelectionUI = updateSelectionUI;
 window.clearSelection = clearSelection;
