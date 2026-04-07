@@ -885,6 +885,38 @@ function deleteQuestion(idx) {
   renderQBList();
 }
 
+// Password gate
+const PW_HASH = 'b28378833206ba0a1c891cff60b55b7db3e03b94e5b3ad155bbf4b3a40c49c6b';
+async function hashPw(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function checkPw(){
+  const val = document.getElementById('pw-input').value;
+  const hash = await hashPw(val);
+  if(hash === PW_HASH){
+    sessionStorage.setItem('drm-auth','1');
+    localStorage.setItem('drm-auth','1');
+    const gate = document.getElementById('pw-gate');
+    gate.style.opacity='0';
+    gate.style.transition='opacity .3s';
+    setTimeout(()=>gate.remove(), 300);
+  } else {
+    const inp = document.getElementById('pw-input');
+    const err = document.getElementById('pw-err');
+    inp.classList.add('pw-error');
+    err.textContent = 'Невірний пароль';
+    setTimeout(()=>inp.classList.remove('pw-error'), 400);
+    inp.value=''; inp.focus();
+  }
+}
+// Check session on load
+if(sessionStorage.getItem('drm-auth')==='1' || localStorage.getItem('drm-auth')==='1'){
+  const g=document.getElementById('pw-gate'); if(g) g.remove();
+} else {
+  setTimeout(()=>{ const i=document.getElementById('pw-input'); if(i) i.focus(); }, 100);
+}
+
 function buildChips(){ /* no-op — kept for compatibility */ }
 
 (async () => {
@@ -1024,6 +1056,8 @@ window.buildQuestions = buildQuestions;
 window.appendQuestions = appendQuestions;
 window.renderQBList = renderQBList;
 window.deleteQuestion = deleteQuestion;
+window.hashPw = hashPw;
+window.checkPw = checkPw;
 window.buildChips = buildChips;
 window.copyToLoop = copyToLoop;
 window.copyToExcel = copyToExcel;
